@@ -6,15 +6,31 @@ public class Token {
     private TokenType Type;
     private Object Value;
     private Pos StartPos;
-    private Pos EndPos;
-    public Token(TokenType t, Object v,Pos s, Pos e){
+    public Token(TokenType t, Object v,Pos s){
         this.Type = t;
         this.Value = v;
         this.StartPos = s;
-        this.EndPos = e;
     }
     @Override
     public String toString(){
-        return new StringBuilder().append("Token(").append(Type).append(",Value:").append(Value).append("),at:").append(StartPos).toString();
+        StringBuilder result = new StringBuilder();
+        result.append("Token(").append(Type);
+        if(this.Type==TokenType.EOF){
+            result.append(')');
+            return result.toString();
+        }
+        return result.append(",Value:").append(Value).append("),at:").append(StartPos).toString();
+    }
+
+    public TokenType getType() {
+        return Type;
+    }
+
+    public Object getValue() {
+        return Value;
+    }
+
+    public Pos getStartPos() {
+        return StartPos;
     }
 }

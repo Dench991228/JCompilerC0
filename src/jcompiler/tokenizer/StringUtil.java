@@ -63,22 +63,24 @@ public class StringUtil {
         this.CurPos = this.nextPos(this.CurPos);
         return result;
     }
-    /*瞅一眼下一个字符是啥，务必保证当前不是EOF*/
+    /*瞅一眼当前字符是啥*/
     public char peekChar(){
-        Pos next = this.nextPos(this.CurPos);
-        if(isEOF(next))return (char)(0);
-        else return this.getCharAtPos(next);
+        return this.getCharAtPos(CurPos);
     }
     /*返回一个字符，本质上是指针往回走，不能在文件开头这么做*/
     public void unread(){
         this.CurPos = this.formerPos(this.CurPos);
     }
-    /*移动到一个不是空格的地方*/
+    /*移动到一个不是空格的地方，注意不能是EOF*/
     public void skipBlank(){
         char cur_char = this.getCharAtPos(this.CurPos);
         while(!this.isEOF(this.CurPos)&&(cur_char==' '||cur_char=='\n'||cur_char=='\t')){
             this.CurPos = this.nextPos(this.CurPos);
             if(!this.isEOF(CurPos))cur_char = this.getCharAtPos(this.CurPos);
         }
+    }
+    /*获取当前的位置*/
+    public Pos getCurPos(){
+        return this.CurPos;
     }
 }
