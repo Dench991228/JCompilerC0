@@ -1,0 +1,8 @@
+FN_KW:fn
+LET_KW:let
+CONST_KW:const
+AS_KW:as
+WHILE_KW:while
+IF_KW:if
+ELSE_KW:else
+RETURN_KW:return
