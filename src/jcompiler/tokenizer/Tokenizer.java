@@ -5,10 +5,7 @@ import jcompiler.util.Pos;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 
 /* 状态图中的一个点 */
 class StateNode{
@@ -114,7 +111,7 @@ public class Tokenizer {
             System.out.println("Tokenizer: Reserved word file not found!");
         }
     }
-    /*初始化状态图，硬编码部分，主要包括整数和标识符*/
+    /*初始化状态图，硬编码部分，主要包括整数和标识符，以及字符串字面量*/
     static{
         /*新建各种状态*/
         StartNode = new StateNode(false, null);
@@ -162,6 +159,51 @@ public class Tokenizer {
             ident_node.addTransfer(cur_digit, integer_node);
             cur_digit++;
         }
+
+        /*字符串字面量相关节点*/
+        StateNode string_left_quote = new StateNode(false,null);//字符串的左侧引号
+        StateNode string_regular_char = new StateNode(false, null);//字符串的常规字符
+        StateNode string_slash = new StateNode(false,null);//遇到转义字符的斜杠
+        StateNode string_escaped_char = new StateNode(false,null);//转义字符结束
+        StateNode string_right_quote = new StateNode(true, TokenType.STRING_LITERAL);//字符串字面量结束
+        StartNode.addTransfer('\"', string_left_quote);//初始状态，遇到左引号，进入字符串匹配过程
+        /*左引号状态相关*/
+        /*遇到常规字符，进入常规字符匹配状态*/
+        /*遇到另一个引号，进入右引号状态*/
+        /*遇到反斜杠进入转义字符匹配*/
+        for(char c=0;c<=(char)(65534);c++){
+            if(c!='\"'&&c!='\\'){
+                string_left_quote.addTransfer(c, string_regular_char);//左引号之后遇到各种正常的字符，都应该去往字符串正常字符
+            }
+        }
+        string_left_quote.addTransfer('\"', string_right_quote);//遇到另一个引号，直接结束字符串
+        string_left_quote.addTransfer('\\', string_slash);//遇到反斜杠，进入转义字符匹配状态
+        /*常规字符相关*/
+        /*遇到常规字符，到自己*/
+        /*遇到反斜杠，去反斜杠状态*/
+        /*遇到右引号，去右引号状态*/
+        for(char c=0;c<=(char)(65534);c++){
+            if(c!='\"'&&c!='\\'){
+                string_regular_char.addTransfer(c, string_regular_char);//左引号之后遇到各种正常的字符，都应该去往字符串正常字符
+            }
+        }
+        string_regular_char.addTransfer('\"', string_right_quote);//遇到另一个引号，直接结束字符串
+        string_regular_char.addTransfer('\\', string_slash);//遇到反斜杠，进入转义字符匹配状态
+        /*斜杠状态相关*/
+        /*只考虑'"\rnt转移到转义状态，其他一律不行*/
+        HashSet<Character> escaped_char = new HashSet<>(Arrays.asList('t', 'n', 'r', '\\', '\'', '\"'));
+        for(char c:escaped_char){
+            string_slash.addTransfer(c, string_escaped_char);
+        }
+        /*转义符状态*/
+        /*和常规字符一样的*/
+        for(char c=0;c<=(char)(65534);c++){
+            if(c!='\"'&&c!='\\'){
+                string_escaped_char.addTransfer(c, string_regular_char);//左引号之后遇到各种正常的字符，都应该去往字符串正常字符
+            }
+        }
+        string_escaped_char.addTransfer('\"', string_right_quote);//遇到另一个引号，直接结束字符串
+        string_escaped_char.addTransfer('\\', string_slash);//遇到反斜杠，进入转义字符匹配状态
     }
     /*初始化状态图，运算符方面*/
     static{
@@ -205,17 +247,24 @@ public class Tokenizer {
         /*到了一个终结状态*/
         if(cur_node.getIsTerm()){
             TokenType type = cur_node.getTokenType();
+            String name = this.SavedWord.toString();
             switch(type){
                 case UINT_LITERAL://数字字面量
                     int value = Integer.parseInt(this.SavedWord.toString());
                     this.SavedWord = new StringBuilder();
                     return new Token(TokenType.UINT_LITERAL, value, this.StartPos);
+                case STRING_LITERAL:
+                    //掐头去尾
+                    //转移
+                    this.SavedWord = new StringBuilder();
+                    name = name.substring(1, name.length()-1);
+                    name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
+                    name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
+                    return new Token(TokenType.STRING_LITERAL, name, this.StartPos);
                 case IDENT://广义标识符
-                    String name = this.SavedWord.toString();
                     this.SavedWord = new StringBuilder();
                     return new Token(ReservedWords.getOrDefault(this.SavedWord.toString(), type), name, this.StartPos);
                 default://其他类型，基本上意味着是操作符
-                    name = this.SavedWord.toString();
                     this.SavedWord = new StringBuilder();
                     return new Token(type, name, this.StartPos);
             }

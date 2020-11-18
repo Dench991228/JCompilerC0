@@ -6,6 +6,7 @@ import jcompiler.tokenizer.Tokenizer;
 import jcompiler.tokenizer.exceptions.UnknownTokenException;
 
 import java.io.*;
+import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
