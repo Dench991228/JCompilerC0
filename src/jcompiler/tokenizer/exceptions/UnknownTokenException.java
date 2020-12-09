@@ -1,4 +1,4 @@
 package jcompiler.tokenizer.exceptions;
 
-public class UnknownTokenException extends Exception{
+public class UnknownTokenException extends RuntimeException{
 }

@@ -1,4 +1,4 @@
 package jcompiler.analyzer.exceptions;
 
-public class ErrorTokenTypeException extends Exception{
+public class ErrorTokenTypeException extends RuntimeException{
 }
