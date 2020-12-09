@@ -40,8 +40,13 @@ public enum TokenType {
     COMMA,
     COLON,
     SEMICOLON,
+    SHARP,
     /* 文件结尾 */
-    EOF;
+    EOF,
+    /*类型系统*/
+    TY_INT,
+    TY_DOUBLE,
+    TY_VOID;
     @Override
     public String toString(){
         return this.name();

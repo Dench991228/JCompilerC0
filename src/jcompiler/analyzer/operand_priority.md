@@ -1,2 +1,17 @@
 |%%%|#|+|-|*|/|==|!=|\<|\>|\>=|\<=|=|as|\(|\)|
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+#|r|s|s|s|s|s|s|s|s|s|s|s|s|s|e
++|r|r|r|s|s|r|r|r|r|r|r|r|s|s|r
+-|r|r|r|s|s|r|r|r|r|r|r|r|s|s|r
+*|r|r|r|r|r|r|r|r|r|r|r|r|s|s|r
+/|r|r|r|r|r|r|r|r|r|r|r|r|s|s|r
+==|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+!=|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+&gt;|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+&lt;|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+&gt;=|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+&lt;=|r|s|s|s|s|r|r|r|r|r|r|r|s|s|r
+=|r|s|s|s|s|s|s|s|s|s|s|s|s|s|s
+as|r|r|r|r|r|r|r|r|r|r|r|r|r|e|r
+(|e|s|s|s|s|s|s|s|s|s|s|s|s|s|s
+)|r|r|r|r|r|r|r|r|r|r|r|r|r|e|r
