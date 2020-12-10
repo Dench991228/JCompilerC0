@@ -245,7 +245,8 @@ public class ExprAnalyzer {
         this.Stack.addFirst(new Token(TokenType.SHARP, 0, new Pos(-1,-1)));
         while(this.Matrix.OperandTypes.contains(this.Util.peek().getType())){
             Token next = this.Util.next();
-            if(this.isTopToken()&&BinaryOperands.contains(((Token)this.Stack.peekFirst()).getType())){
+            /*什么情况下需要把减号变成负号：不是右括号,ident,不是LITERAL,不是type*/
+            if(this.isTopToken()&&!this.isTopTokenType(TokenType.UINT_LITERAL)&&!this.isTopTokenType(TokenType.IDENT)&&!this.isTopTokenType(TokenType.TY)&&!this.isTopTokenType(TokenType.STRING_LITERAL)&&!this.isTopTokenType(TokenType.R_PAREN)){
                 next.setType(TokenType.NEG);
             }
             this.putToken(next);
