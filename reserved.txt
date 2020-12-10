@@ -6,6 +6,6 @@ WHILE_KW:while
 IF_KW:if
 ELSE_KW:else
 RETURN_KW:return
-TY_INT:int
-TY_DOUBLE:double
-TY_VOID:void
+TY:int
+TY:double
+TY:void

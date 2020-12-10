@@ -33,4 +33,8 @@ public class Token {
     public Pos getStartPos() {
         return StartPos;
     }
+
+    public void setType(TokenType tt){
+        this.Type = tt;
+    }
 }

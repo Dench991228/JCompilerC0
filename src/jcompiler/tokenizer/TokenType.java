@@ -21,6 +21,7 @@ public enum TokenType {
     IDENT,
 
     /* 运算符 */
+    NEG,
     PLUS,
     MINUS,
     MUL,
@@ -44,9 +45,7 @@ public enum TokenType {
     /* 文件结尾 */
     EOF,
     /*类型系统*/
-    TY_INT,
-    TY_DOUBLE,
-    TY_VOID;
+    TY;
     @Override
     public String toString(){
         return this.name();
