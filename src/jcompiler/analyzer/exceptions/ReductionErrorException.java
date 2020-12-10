@@ -1,4 +1,5 @@
 package jcompiler.analyzer.exceptions;
 
-public class ReductionErrorException {
+public class ReductionErrorException extends RuntimeException{
+
 }

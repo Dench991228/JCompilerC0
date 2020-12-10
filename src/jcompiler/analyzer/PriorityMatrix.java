@@ -1,32 +1,29 @@
 package jcompiler.analyzer;
 
+import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.tokenizer.TokenType;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class PriorityMatrix {
     private Map<TokenType, Map<TokenType, Character>> matrix;
     private List<TokenType> OperandTypes;
-    public PriorityMatrix(){
+    public PriorityMatrix() throws FileNotFoundException {
         this.matrix = new HashMap<>();
-        this.OperandTypes = List.of(TokenType.SHARP, TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.LT, TokenType.GE, TokenType.LE, TokenType.ASSIGN, TokenType.AS_KW, TokenType.L_PAREN, TokenType.R_PAREN);
-        this.putLine(TokenType.SHARP, "r|s|s|s|s|s|s|s|s|s|s|s|s|s|e");
-        this.putLine(TokenType.PLUS, "r|r|r|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.MINUS, "r|r|r|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.MUL, "r|r|r|r|r|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.DIV, "r|r|r|r|r|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.EQ, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.NEQ, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.GT, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.LT, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.GE, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.LE, "r|s|s|s|s|r|r|r|r|r|r|r|s|s|r");
-        this.putLine(TokenType.ASSIGN, "r|s|s|s|s|s|s|s|s|s|s|s|s|s|s");
-        this.putLine(TokenType.AS_KW, "r|r|r|r|r|r|r|r|r|r|r|r|r|e|r");
-        this.putLine(TokenType.L_PAREN, "e|s|s|s|s|s|s|s|s|s|s|s|s|s|s");
-        this.putLine(TokenType.R_PAREN, "r|r|r|r|r|r|r|r|r|r|r|r|r|e|r");
+        this.OperandTypes = List.of(TokenType.SHARP, TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.LT, TokenType.GE, TokenType.LE, TokenType.ASSIGN, TokenType.AS_KW, TokenType.L_PAREN, TokenType.R_PAREN, TokenType.COMMA, TokenType.NEG);
+        Scanner sc = new Scanner(new File("operand_priority.md"));
+        String new_line = sc.nextLine();
+        new_line = sc.nextLine();
+        for(TokenType tt:this.OperandTypes){
+            new_line = sc.nextLine();
+            new_line = new_line.split("\\|",1)[1];
+            this.putLine(tt, new_line);
+        }
     }
     /*输入一个操作符，判断优先级*/
     private void putLine(TokenType tt, String value){
@@ -39,5 +36,15 @@ public class PriorityMatrix {
             matrix.get(tt).put(t, values[i].charAt(0));
             i++;
         }
+    }
+    /*比较两个算符的优先级*/
+    public char compare(TokenType tt1, TokenType tt2) throws ErrorTokenTypeException {
+        if(!this.matrix.containsKey(tt1)){
+            throw new ErrorTokenTypeException();
+        }
+        if(!this.matrix.get(tt1).containsKey(tt2)){
+            throw new ErrorTokenTypeException();
+        }
+        return this.matrix.get(tt1).get(tt2);
     }
 }
