@@ -17,14 +17,14 @@ public class AnalyzerUtil {
     }
     /*若干基础设施*/
     // 看一眼下一个token是啥
-    private Token peek() throws UnknownTokenException {
+    public Token peek() throws UnknownTokenException {
         if(this.PeekedToken==null){
             this.PeekedToken = this.Tokenizer.getToken();
         }
         return this.PeekedToken;
     }
     // 前进到下一个token
-    private Token next() throws UnknownTokenException{
+    public Token next() throws UnknownTokenException{
         if(this.PeekedToken!=null){
             Token t = this.PeekedToken;
             this.PeekedToken = null;
@@ -35,18 +35,18 @@ public class AnalyzerUtil {
         }
     }
     // 检查一下下一个token是不是这个类型
-    private boolean check(TokenType tt)throws UnknownTokenException{
+    public boolean check(TokenType tt)throws UnknownTokenException{
         return this.peek().getType()==tt;
     }
     // 如果下一个token是这个类型，那就前进，返回这个token，否则是null
-    private Token nextIf(TokenType tt) throws UnknownTokenException{
+    public Token nextIf(TokenType tt) throws UnknownTokenException{
         if(this.peek().getType()==tt)return this.next();
         else{
             return null;
         }
     }
     // 期望下一个token的类别，如果不是，就抛出异常，否则就往下
-    private void expect(TokenType tt) throws Exception {
+    public void expect(TokenType tt) throws Exception {
         if(this.peek().getType()==tt)this.next();
         else{
             throw new ErrorTokenTypeException();

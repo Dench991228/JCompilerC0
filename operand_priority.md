@@ -19,5 +19,5 @@ as|r|r|r|r|r|r|r|r|r|r|r|e|r|e|r|r|e|s|e|e|e
 -*|r|r|r|r|r|r|r|r|r|r|r|e|r|e|r|r|s|e|s|s|s
 ty|r|r|r|r|r|r|r|r|r|r|r|e|r|r|r|r|r|e|e|e|e
 ident|r|r|r|r|r|r|r|r|r|r|r|r|r|s|r|r|e|e|e|e|e
-str|r|r|r|r|r|r|r|r|r|r|r|r|r|s|r|r|e|e|e|e|e
-uint|r|r|r|r|r|r|r|r|r|r|r|r|r|s|r|r|e|e|e|e|e
+str|e|e|e|e|e|e|e|e|e|e|e|e|e|e|r|r|e|e|e|e|e
+uint|r|r|r|r|r|r|r|r|r|r|r|e|r|s|r|r|e|e|e|e|e

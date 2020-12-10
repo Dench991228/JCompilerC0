@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class PriorityMatrix {
     private Map<TokenType, Map<TokenType, Character>> matrix;
-    private List<TokenType> OperandTypes;
+    public List<TokenType> OperandTypes;
     public PriorityMatrix() throws FileNotFoundException {
         this.matrix = new HashMap<>();
         this.OperandTypes = List.of(TokenType.SHARP, TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.LT, TokenType.GE, TokenType.LE, TokenType.ASSIGN, TokenType.AS_KW, TokenType.L_PAREN, TokenType.R_PAREN, TokenType.COMMA, TokenType.NEG);
@@ -37,7 +37,7 @@ public class PriorityMatrix {
             i++;
         }
     }
-    /*比较两个算符的优先级*/
+    /*比较两个算符的优先级，tt1是栈顶的，tt2是输入串的*/
     public char compare(TokenType tt1, TokenType tt2) throws ErrorTokenTypeException {
         if(!this.matrix.containsKey(tt1)){
             throw new ErrorTokenTypeException();

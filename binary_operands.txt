@@ -1,0 +1,11 @@
+PLUS@+
+MINUS@-
+MUL@*
+DIV@/
+ASSIGN@=
+EQ@==
+NEQ@!=
+LT@<
+GT@>
+LE@<=
+GE@>=
