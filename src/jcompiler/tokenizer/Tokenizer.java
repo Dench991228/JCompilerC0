@@ -103,7 +103,6 @@ public class Tokenizer {
             while(sc.hasNextLine()){
                 String input_line = sc.nextLine();
                 String[] name_content = input_line.split(":");
-                //System.out.println(name_content[1]+":"+TokenType.valueOf(name_content[0]));
                 ReservedWords.put(name_content[1], TokenType.valueOf(name_content[0]));
             }
         }
@@ -263,7 +262,8 @@ public class Tokenizer {
                     return new Token(TokenType.STRING_LITERAL, name, this.StartPos);
                 case IDENT://广义标识符
                     this.SavedWord = new StringBuilder();
-                    return new Token(ReservedWords.getOrDefault(this.SavedWord.toString(), type), name, this.StartPos);
+                    //System.out.println("Ident checking:"+this.SavedWord.toString());
+                    return new Token(ReservedWords.getOrDefault(name, type), name, this.StartPos);
                 default://其他类型，基本上意味着是操作符
                     this.SavedWord = new StringBuilder();
                     return new Token(type, name, this.StartPos);
