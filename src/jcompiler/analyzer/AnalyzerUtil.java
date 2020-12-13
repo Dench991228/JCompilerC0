@@ -25,14 +25,17 @@ public class AnalyzerUtil {
     }
     // 前进到下一个token
     public Token next() throws UnknownTokenException{
+        Token t;
         if(this.PeekedToken!=null){
-            Token t = this.PeekedToken;
+            t = this.PeekedToken;
             this.PeekedToken = null;
-            return t;
+            //System.out.println(t.toString());
         }
         else{
-            return this.Tokenizer.getToken();
+            t = this.Tokenizer.getToken();
+            //System.out.println(t.toString());
         }
+        return t;
     }
     // 检查一下下一个token是不是这个类型
     public boolean check(TokenType tt)throws UnknownTokenException{

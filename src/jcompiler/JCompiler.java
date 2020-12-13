@@ -1,5 +1,7 @@
 package jcompiler;
 
+import jcompiler.analyzer.AnalyzerUtil;
+import jcompiler.analyzer.ExprAnalyzer;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 import jcompiler.tokenizer.Tokenizer;
@@ -11,15 +13,14 @@ import java.util.Scanner;
 public class JCompiler {
     public static void main(String[] args){
         Tokenizer t = new Tokenizer("test.txt");
+        AnalyzerUtil util = new AnalyzerUtil(t);
         try{
-            Token token = t.getToken();
-            while(token.getType()!= TokenType.EOF){
-                System.out.println(token.toString());
-                token = t.getToken();
-            }
+            ExprAnalyzer expr_analyzer = new ExprAnalyzer(util);
+            expr_analyzer.analyseExpr();
+            System.out.println();
         }
-        catch(UnknownTokenException e){
-            System.out.println("Stumbled Upon Unknown Token!");
+        catch(FileNotFoundException e){
+            System.out.println("file not found");
         }
     }
 }
