@@ -180,7 +180,7 @@ public class ExprAnalyzer {
                     t = (Token)this.Stack.pollFirst();
                     nt.addTerminal(t);
                     /*判断接下来是不是expr*/
-                    if(!this.isTopNonTerm()||this.isTopNonTermType(NonTerminalType.EXPR)||this.Stack.isEmpty())throw new ReductionErrorException();
+                    if(!this.isTopNonTerm()||!this.isTopNonTermType(NonTerminalType.EXPR)||this.Stack.isEmpty())throw new ReductionErrorException();
                     nt.addNonTerminal((NonTerminal) this.Stack.pollFirst());
                     if(this.isTopNonTerm())throw new ReductionErrorException();
                     System.out.println(nt.toString()+" was reduced");
