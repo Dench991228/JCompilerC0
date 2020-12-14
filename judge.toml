@@ -3,5 +3,5 @@
 image = { source = "dockerfile", path = ".", tag = "c0-dench" }
 
 run = [
-    "java jcompiler/JCompiler $input",
+    "java jcompiler/JCompiler $input -classpath .",
 ]
