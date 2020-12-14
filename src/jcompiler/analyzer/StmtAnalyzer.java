@@ -31,13 +31,13 @@ public class StmtAnalyzer {
     }
 
     /*解析运算式语句*/
-    private void analyseExpression() throws Exception {
+    private void analyseExpression(){
         this.ExprAnalyzer.analyseExpr();
         this.Util.expect(TokenType.SEMICOLON);
     }
 
     /*解析声明语句*/
-    private void analyseDeclStmt() throws Exception {
+    private void analyseDeclStmt(){
         Token first = this.Util.peek();
         switch (first.getType()){
             case LET_KW:
@@ -65,7 +65,7 @@ public class StmtAnalyzer {
     }
 
     /*解析if语句*/
-    private void analyseIfStmt() throws Exception {
+    private void analyseIfStmt(){
         this.Util.expect(TokenType.IF_KW);
         this.ExprAnalyzer.analyseExpr();
         this.analyseBlockStmt();
@@ -82,14 +82,14 @@ public class StmtAnalyzer {
     }
 
     /*解析while语句*/
-    private void analyseWhileStmt() throws Exception {
+    private void analyseWhileStmt(){
         this.Util.expect(TokenType.WHILE_KW);
         this.ExprAnalyzer.analyseExpr();
         this.analyseBlockStmt();
     }
 
     /*解析返回语句*/
-    private void analyseReturnStmt() throws Exception {
+    private void analyseReturnStmt(){
         this.Util.expect(TokenType.RETURN_KW);
         if(this.Util.nextIf(TokenType.SEMICOLON)==null){
             this.ExprAnalyzer.analyseExpr();
@@ -98,7 +98,7 @@ public class StmtAnalyzer {
     }
 
     /*解析语句块*/
-    private void analyseBlockStmt() throws Exception {
+    private void analyseBlockStmt(){
         this.Util.expect(TokenType.L_BRACE);
         while(this.Util.peek().getType()!=TokenType.R_BRACE){
             this.analyseStatement();
@@ -107,12 +107,12 @@ public class StmtAnalyzer {
     }
 
     /*解析空语句*/
-    private void analyseEmptyStmt() throws Exception {
+    private void analyseEmptyStmt() {
         this.Util.expect(TokenType.SEMICOLON);
     }
 
     /*对外服务，语句分析*/
-    public void analyseStatement() throws Exception {
+    public void analyseStatement(){
         Token t = this.Util.peek();
         switch(t.getType()){
             case SEMICOLON://空语句

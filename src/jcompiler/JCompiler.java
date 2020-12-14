@@ -2,6 +2,7 @@ package jcompiler;
 
 import jcompiler.analyzer.AnalyzerUtil;
 import jcompiler.analyzer.ExprAnalyzer;
+import jcompiler.analyzer.StmtAnalyzer;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 import jcompiler.tokenizer.Tokenizer;
@@ -15,8 +16,8 @@ public class JCompiler {
         Tokenizer t = new Tokenizer("test.txt");
         AnalyzerUtil util = new AnalyzerUtil(t);
         try{
-            ExprAnalyzer expr_analyzer = new ExprAnalyzer(util);
-            expr_analyzer.analyseExpr();
+            StmtAnalyzer stmt_analyzer = new StmtAnalyzer(util);
+            stmt_analyzer.analyseStatement();
             System.out.println();
         }
         catch(FileNotFoundException e){

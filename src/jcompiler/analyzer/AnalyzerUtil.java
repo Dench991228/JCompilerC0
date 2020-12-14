@@ -49,7 +49,7 @@ public class AnalyzerUtil {
         }
     }
     // 期望下一个token的类别，如果不是，就抛出异常，否则就往下
-    public void expect(TokenType tt) throws Exception {
+    public void expect(TokenType tt){
         if(this.peek().getType()==tt)this.next();
         else{
             throw new ErrorTokenTypeException();
