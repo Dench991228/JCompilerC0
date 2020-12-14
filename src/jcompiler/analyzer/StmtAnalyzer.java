@@ -76,7 +76,9 @@ public class StmtAnalyzer {
                 break;
             }
             else{
-                this.analyseIfStmt();
+                this.Util.expect(TokenType.IF_KW);
+                this.ExprAnalyzer.analyseExpr();
+                this.analyseBlockStmt();
             }
         }
     }
