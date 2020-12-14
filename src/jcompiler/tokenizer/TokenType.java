@@ -15,9 +15,14 @@ public enum TokenType {
     CONTINUE_KW,
     BREAK_KW,
 
+    /*评论：默认是一个单词*/
+    CMT,
+
     /* 字面量部分 */
     UINT_LITERAL,//无符号整数
     STRING_LITERAL,//字符串
+    CHAR_LITERAL,
+    DOUBLE_LITERAL,
 
     /* 标识符 */
     IDENT,

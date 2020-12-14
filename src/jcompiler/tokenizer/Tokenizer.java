@@ -143,9 +143,32 @@ public class Tokenizer {
             cur_digit++;
         }
 
+        /*浮点数字面量识别*/
+        /*整数遇到点，进入整数加点状态*/
+        StateNode integer_with_dot = new StateNode(false, null);
+        integer_node.addTransfer('.', integer_with_dot);
+        /*整数加点遇到整数，进入合法非科学计数法浮点数*/
+        StateNode double_no_sci = new StateNode(true, TokenType.DOUBLE_LITERAL);
+        cur_digit = '0';
+        for(int i=0;i<10;i++){
+            integer_with_dot.addTransfer(cur_digit, double_no_sci);
+            cur_digit++;
+        }
+        /*上述节点遇到e进入e结尾浮点数*/
+        StateNode double_with_e = new StateNode(false, null);
+        double_no_sci.addTransfer('e', double_with_e);
+        /*上述节点遇到整数进入合法的科学计数法浮点数*/
+        StateNode double_sci = new StateNode(true,null);
+        cur_digit = '0';
+        for(int i=0;i<10;i++){
+            double_with_e.addTransfer(cur_digit, double_sci);
+            cur_digit++;
+        }
+
         /*添加标识符的各种转移关系*/
         cur_lower = 'a';
         cur_upper = 'A';
+
         for(int i=0;i<26;i++){
             ident_node.addTransfer(cur_lower, ident_node);
             ident_node.addTransfer(cur_upper, ident_node);
@@ -203,6 +226,9 @@ public class Tokenizer {
         }
         string_escaped_char.addTransfer('\"', string_right_quote);//遇到另一个引号，直接结束字符串
         string_escaped_char.addTransfer('\\', string_slash);//遇到反斜杠，进入转义字符匹配状态
+
+        /*字符字面量*/
+
     }
     /*初始化状态图，运算符方面*/
     static{
