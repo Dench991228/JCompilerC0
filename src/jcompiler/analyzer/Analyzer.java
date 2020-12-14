@@ -1,6 +1,6 @@
 package jcompiler.analyzer;
 
-import jcompiler.analyzer.exceptions.StmtSyntaxError;
+import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 
@@ -40,7 +40,7 @@ public class Analyzer {
         this.Util.next();
         this.Util.expect(TokenType.ARROW);
         this.Util.expect(TokenType.TY);
-        this.StmtAnalyzer.analyseStatement();
+        this.StmtAnalyzer.analyseStatement(false);
     }
 
     /*顶层的分析*/
@@ -50,13 +50,13 @@ public class Analyzer {
             switch(t.getType()){
                 case LET_KW:
                 case CONST_KW:
-                    this.StmtAnalyzer.analyseStatement();
+                    this.StmtAnalyzer.analyseStatement(false);
                     break;
                 case FN_KW:
                     this.analyseFunction();
                     break;
                 default:
-                    throw new StmtSyntaxError();
+                    throw new StmtSyntaxException();
             }
         }
     }
