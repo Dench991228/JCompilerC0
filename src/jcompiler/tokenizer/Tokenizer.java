@@ -283,9 +283,11 @@ public class Tokenizer {
             System.out.println("Tokenizer: Reserved word file not found!");
         }
     }
+
     public Tokenizer(String input_file){
         this.Worker = new StringUtil(input_file);
     }
+
     public Token getToken()throws UnknownTokenException {
         if(!this.Worker.isCurEOF())this.Worker.skipBlank();
         if(this.Worker.isCurEOF())return new Token(TokenType.EOF, null,null);
@@ -311,11 +313,25 @@ public class Tokenizer {
         if(cur_node.getIsTerm()){
             TokenType type = cur_node.getTokenType();
             String name = this.SavedWord.toString();
+            Token result;
             switch(type){
+                case CHAR_LITERAL:
+                    this.SavedWord = new StringBuilder();
+                    name = name.substring(1, name.length()-1);
+                    name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
+                    name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
+                    result = new Token(TokenType.CHAR_LITERAL, name, this.StartPos);
+                    break;
+                case DOUBLE_LITERAL:
+                    double double_value = Double.parseDouble(this.SavedWord.toString());
+                    this.SavedWord = new StringBuilder();
+                    result = new Token(TokenType.DOUBLE_LITERAL, double_value, this.StartPos);
+                    break;
                 case UINT_LITERAL://数字字面量
                     int value = Integer.parseInt(this.SavedWord.toString());
                     this.SavedWord = new StringBuilder();
-                    return new Token(TokenType.UINT_LITERAL, value, this.StartPos);
+                    result = new Token(TokenType.UINT_LITERAL, value, this.StartPos);
+                    break;
                 case STRING_LITERAL:
                     //掐头去尾
                     //转移
@@ -323,14 +339,23 @@ public class Tokenizer {
                     name = name.substring(1, name.length()-1);
                     name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
                     name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
-                    return new Token(TokenType.STRING_LITERAL, name, this.StartPos);
+                    result = new Token(TokenType.STRING_LITERAL, name, this.StartPos);
+                    break;
                 case IDENT://广义标识符
                     this.SavedWord = new StringBuilder();
                     //System.out.println("Ident checking:"+this.SavedWord.toString());
-                    return new Token(ReservedWords.getOrDefault(name, type), name, this.StartPos);
+                    result =  new Token(ReservedWords.getOrDefault(name, type), name, this.StartPos);
+                    break;
                 default://其他类型，基本上意味着是操作符
                     this.SavedWord = new StringBuilder();
-                    return new Token(type, name, this.StartPos);
+                    result = new Token(type, name, this.StartPos);
+                    break;
+            }
+            if(result.getType()==TokenType.CMT){
+                return getToken();
+            }
+            else{
+                return result;
             }
         }
         /*有问题*/
