@@ -98,12 +98,45 @@ public class StmtAnalyzer {
     }
 
     /*解析语句块*/
-    private void analyseBlockStmt()throws StmtSyntaxError{
-
+    private void analyseBlockStmt() throws Exception {
+        this.Util.expect(TokenType.L_BRACE);
+        while(this.Util.peek().getType()!=TokenType.R_BRACE){
+            this.analyseStatement();
+        }
+        this.Util.expect(TokenType.R_BRACE);
     }
 
     /*解析空语句*/
     private void analyseEmptyStmt() throws Exception {
         this.Util.expect(TokenType.SEMICOLON);
+    }
+
+    /*对外服务，语句分析*/
+    public void analyseStatement() throws Exception {
+        Token t = this.Util.peek();
+        switch(t.getType()){
+            case SEMICOLON://空语句
+                this.analyseEmptyStmt();
+                break;
+            case L_BRACE://语句块
+                this.analyseBlockStmt();
+                break;
+            case WHILE_KW://while语句
+                this.analyseWhileStmt();
+                break;
+            case IF_KW://if语句
+                this.analyseIfStmt();
+                break;
+            case LET_KW://这两个都是声明
+            case CONST_KW:
+                this.analyseDeclStmt();
+                break;
+            case RETURN_KW://返回语句
+                this.analyseReturnStmt();
+                break;
+            default://运算式
+                this.analyseExpression();
+                break;
+        }
     }
 }
