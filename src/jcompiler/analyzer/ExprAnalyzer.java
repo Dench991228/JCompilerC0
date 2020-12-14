@@ -75,7 +75,7 @@ public class ExprAnalyzer {
     static{//初始化过程：获得二元运算符
         Scanner sc = null;
         try {
-            sc = new Scanner(new File("operands.txt"));
+            sc = new Scanner(new File("binary_operands.txt"));
             while(sc.hasNextLine()){
                 String input_line = sc.nextLine();
                 String[] name_content = input_line.split("@");
