@@ -1,7 +1,6 @@
 PLUS@+
 MINUS@-
 MUL@*
-DIV@/
 ASSIGN@=
 EQ@==
 NEQ@!=

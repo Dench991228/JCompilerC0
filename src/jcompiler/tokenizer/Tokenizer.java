@@ -228,7 +228,45 @@ public class Tokenizer {
         string_escaped_char.addTransfer('\\', string_slash);//遇到反斜杠，进入转义字符匹配状态
 
         /*字符字面量*/
+        /*左边的单引号*/
+        StateNode node_single_quote = new StateNode(false, null);
+        StartNode.addTransfer('\'', node_single_quote);
+        /*遇到斜线*/
+        StateNode char_slash = new StateNode(false, null);
+        StartNode.addTransfer('\\', char_slash);
+        /*从斜线出来到转义字符*/
+        StateNode char_escaped = new StateNode(false, null);
+        for(char c:escaped_char){
+            char_slash.addTransfer(c, char_escaped);
+        }
+        /*常规的字符*/
+        StateNode char_normal = new StateNode(false, null);
+        for(char c=0; c<=(char)(65534);c++){
+            if(c!='\\'&&c!='\"'){
+                node_single_quote.addTransfer(c, char_normal);
+            }
+        }
+        /*最终的状态*/
+        StateNode char_end = new StateNode(false, TokenType.CHAR_LITERAL);
+        char_normal.addTransfer('\'', char_end);
+        char_escaped.addTransfer('\'', char_end);
 
+        /*尝试分析注释，注意，除号也是在这里分析的*/
+        /*遇到一个斜线*/
+        StateNode div_node = new StateNode(true, TokenType.DIV);
+        StartNode.addTransfer('/', div_node);
+        /*遇到连续两个斜线*/
+        StateNode double_div = new StateNode(false, null);
+        div_node.addTransfer('/', double_div);
+        /*只要没遇到换行就一直在double_div这里循环*/
+        for(char c=0; c<=(char)(65534);c++){
+            if(c!='\n'){
+                div_node.addTransfer(c, div_node);
+            }
+        }
+        /*遇到换行，就结束注释*/
+        StateNode comment_finish = new StateNode(true, TokenType.CMT);
+        div_node.addTransfer('\n', comment_finish);
     }
     /*初始化状态图，运算符方面*/
     static{
