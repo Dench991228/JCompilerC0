@@ -1,5 +1,6 @@
 package jcompiler;
 
+import jcompiler.analyzer.Analyzer;
 import jcompiler.analyzer.AnalyzerUtil;
 import jcompiler.analyzer.ExprAnalyzer;
 import jcompiler.analyzer.StmtAnalyzer;
@@ -13,11 +14,11 @@ import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
-        Tokenizer t = new Tokenizer("test.txt");
+        Tokenizer t = new Tokenizer(args[0]);
         AnalyzerUtil util = new AnalyzerUtil(t);
         try{
-            StmtAnalyzer stmt_analyzer = new StmtAnalyzer(util);
-            stmt_analyzer.analyseStatement();
+            Analyzer analyser = new Analyzer(util);
+            analyser.analyse();
             System.out.println();
         }
         catch(FileNotFoundException e){
