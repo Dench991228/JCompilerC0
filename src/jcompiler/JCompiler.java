@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
-        Tokenizer t = new Tokenizer("test.txt");
+        Tokenizer t = new Tokenizer(args[0]);
         AnalyzerUtil util = new AnalyzerUtil(t);
         try{
             Analyzer analyser = new Analyzer(util);
