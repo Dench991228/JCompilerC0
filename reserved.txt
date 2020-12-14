@@ -6,6 +6,8 @@ WHILE_KW:while
 IF_KW:if
 ELSE_KW:else
 RETURN_KW:return
+CONTINUE_KW:continue
+BREAK_KW:break
 TY:int
 TY:double
 TY:void

@@ -108,6 +108,17 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.R_BRACE);
     }
 
+    /*解析break语句*/
+    private void analyseBreakStmt(){
+        this.Util.expect(TokenType.BREAK_KW);
+        this.Util.expect(TokenType.SEMICOLON);
+    }
+    /*解析continue语句*/
+    private void analyseContinueStmt(){
+        this.Util.expect(TokenType.CONTINUE_KW);
+        this.Util.expect(TokenType.SEMICOLON);
+    }
+
     /*解析空语句*/
     private void analyseEmptyStmt() {
         this.Util.expect(TokenType.SEMICOLON);
@@ -135,6 +146,12 @@ public class StmtAnalyzer {
                 break;
             case RETURN_KW://返回语句
                 this.analyseReturnStmt();
+                break;
+            case BREAK_KW:
+                this.analyseBreakStmt();
+                break;
+            case CONTINUE_KW:
+                this.analyseContinueStmt();
                 break;
             default://运算式
                 this.analyseExpression();

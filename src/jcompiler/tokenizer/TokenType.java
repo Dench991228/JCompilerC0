@@ -12,6 +12,8 @@ public enum TokenType {
     IF_KW,//if
     ELSE_KW,//else
     RETURN_KW,//return
+    CONTINUE_KW,
+    BREAK_KW,
 
     /* 字面量部分 */
     UINT_LITERAL,//无符号整数
