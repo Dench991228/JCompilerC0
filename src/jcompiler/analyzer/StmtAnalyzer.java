@@ -1,6 +1,7 @@
 package jcompiler.analyzer;
 
 import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
+import jcompiler.analyzer.exceptions.StmtSyntaxError;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 import jcompiler.tokenizer.Tokenizer;
@@ -30,37 +31,79 @@ public class StmtAnalyzer {
     }
 
     /*解析运算式语句*/
-    public void analyseExpression(){
-
+    private void analyseExpression() throws Exception {
+        this.ExprAnalyzer.analyseExpr();
+        this.Util.expect(TokenType.SEMICOLON);
     }
 
     /*解析声明语句*/
-    public void analyseDeclStmt(){
-
+    private void analyseDeclStmt() throws Exception {
+        Token first = this.Util.peek();
+        switch (first.getType()){
+            case LET_KW:
+                this.Util.next();
+                this.Util.expect(TokenType.IDENT);
+                this.Util.expect(TokenType.COLON);
+                this.Util.expect(TokenType.TY);
+                if(this.Util.nextIf(TokenType.ASSIGN)!=null){
+                    this.ExprAnalyzer.analyseExpr();
+                }
+                this.Util.expect(TokenType.SEMICOLON);
+                break;
+            case CONST_KW:
+                this.Util.next();
+                this.Util.expect(TokenType.IDENT);
+                this.Util.expect(TokenType.COLON);
+                this.Util.expect(TokenType.TY);
+                this.Util.expect(TokenType.ASSIGN);
+                this.ExprAnalyzer.analyseExpr();
+                this.Util.expect(TokenType.SEMICOLON);
+                break;
+            default:
+                throw new StmtSyntaxError();
+        }
     }
 
     /*解析if语句*/
-    public void analyseIfStmt(){
-
+    private void analyseIfStmt() throws Exception {
+        this.Util.expect(TokenType.IF_KW);
+        this.ExprAnalyzer.analyseExpr();
+        this.analyseBlockStmt();
+        while(this.Util.peek().getType()==TokenType.ELSE_KW){
+            this.Util.next();
+            if(this.Util.peek().getType()==TokenType.L_BRACE){//左大括号，不会有elif了
+                this.analyseBlockStmt();
+                break;
+            }
+            else{
+                this.analyseIfStmt();
+            }
+        }
     }
 
     /*解析while语句*/
-    public void analyseWhileStmt(){
-
+    private void analyseWhileStmt() throws Exception {
+        this.Util.expect(TokenType.WHILE_KW);
+        this.ExprAnalyzer.analyseExpr();
+        this.analyseBlockStmt();
     }
 
     /*解析返回语句*/
-    public void analyseReturnStmt(){
-
+    private void analyseReturnStmt() throws Exception {
+        this.Util.expect(TokenType.RETURN_KW);
+        if(this.Util.nextIf(TokenType.SEMICOLON)==null){
+            this.ExprAnalyzer.analyseExpr();
+            this.Util.expect(TokenType.SEMICOLON);
+        }
     }
 
     /*解析语句块*/
-    public void analyseBlockStmt(){
+    private void analyseBlockStmt()throws StmtSyntaxError{
 
     }
 
     /*解析空语句*/
-    public void analyseEmptyStmt(){
-
+    private void analyseEmptyStmt() throws Exception {
+        this.Util.expect(TokenType.SEMICOLON);
     }
 }
