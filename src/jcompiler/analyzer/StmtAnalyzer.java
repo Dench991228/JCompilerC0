@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.LoopControlException;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
@@ -42,7 +43,16 @@ public class StmtAnalyzer {
                 this.Util.next();
                 this.Util.expect(TokenType.IDENT);
                 this.Util.expect(TokenType.COLON);
-                this.Util.expect(TokenType.TY);
+                if(this.Util.peek().getType()==TokenType.TY){
+                    Token t = this.Util.peek();
+                    if(((String)t.getValue()).compareTo("void")==0){
+                        throw new ErrorTokenTypeException();
+                    }
+                    else this.Util.next();
+                }
+                else{
+                    throw new ErrorTokenTypeException();
+                }
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
                     this.ExprAnalyzer.analyseExpr();
                 }
