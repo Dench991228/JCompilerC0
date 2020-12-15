@@ -187,6 +187,7 @@ public class ExprAnalyzer {
                 case TY://类型转换
                     //System.out.println("A type change expression was reduced!");
                     nt.addTerminal(t);
+                    if(((String)t.getValue()).compareTo("void")==0)throw new ReductionErrorException();
                     /*判断接下来是不是as关键字*/
                     if(!(this.Stack.peekFirst() instanceof Token)||(((Token) this.Stack.peekFirst()).getType())!=TokenType.AS_KW){
                         throw new ReductionErrorException();
