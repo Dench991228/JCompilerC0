@@ -158,10 +158,12 @@ public class Tokenizer {
         StateNode double_with_e = new StateNode(false, null);
         double_no_sci.addTransfer('e', double_with_e);
         /*上述节点遇到整数进入合法的科学计数法浮点数*/
-        StateNode double_sci = new StateNode(true,null);
+        /*double_sci遇到整数还在自己这里*/
+        StateNode double_sci = new StateNode(true,TokenType.DOUBLE_LITERAL);
         cur_digit = '0';
         for(int i=0;i<10;i++){
             double_with_e.addTransfer(cur_digit, double_sci);
+            double_sci.addTransfer(cur_digit, double_sci);
             cur_digit++;
         }
 
@@ -233,7 +235,7 @@ public class Tokenizer {
         StartNode.addTransfer('\'', node_single_quote);
         /*遇到斜线*/
         StateNode char_slash = new StateNode(false, null);
-        StartNode.addTransfer('\\', char_slash);
+        node_single_quote.addTransfer('\\', char_slash);
         /*从斜线出来到转义字符*/
         StateNode char_escaped = new StateNode(false, null);
         for(char c:escaped_char){
@@ -247,7 +249,7 @@ public class Tokenizer {
             }
         }
         /*最终的状态*/
-        StateNode char_end = new StateNode(false, TokenType.CHAR_LITERAL);
+        StateNode char_end = new StateNode(true, TokenType.CHAR_LITERAL);
         char_normal.addTransfer('\'', char_end);
         char_escaped.addTransfer('\'', char_end);
 

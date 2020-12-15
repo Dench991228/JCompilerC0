@@ -135,6 +135,8 @@ public class ExprAnalyzer {
             switch (t.getType()){
                 case IDENT://标识符
                 case UINT_LITERAL://整数字面量
+                case DOUBLE_LITERAL:
+                case CHAR_LITERAL:
                 case STRING_LITERAL://字面量
                     //System.out.println("A literal expression or a identifier expression was reduced!");
                     nt.addTerminal(t);
@@ -150,6 +152,22 @@ public class ExprAnalyzer {
                     /*把右括号加进去*/
                     nt.addTerminal(t);
                     //右括号出去之后，前面应该要么param_list要么expr，因为不是等号，所以肯定没有左值表达式
+                    //如果左边是左括号，那么必定是函数调用
+                    if(this.isTopTokenType(TokenType.L_PAREN)){
+                        t = (Token)this.Stack.pollFirst();
+                        nt.addTerminal(t);
+                        if(!this.isTopTokenType(TokenType.IDENT)){
+                            throw new ReductionErrorException();
+                        }
+                        else{
+                            t = (Token)this.Stack.pollFirst();
+                            nt.addTerminal(t);
+                            if(this.isTopNonTerm())throw new ReductionErrorException();
+                            else this.Stack.addFirst(nt);
+                            return;
+                        }
+                    }
+                    //有参数的函数调用或者括号表达式
                     if(!this.isTopNonTerm())throw new ReductionErrorException();
                     nt.addNonTerminal((NonTerminal) this.Stack.pollFirst());
                     if(!this.isTopToken()||!this.isTopTokenType(TokenType.L_PAREN)){
@@ -161,9 +179,6 @@ public class ExprAnalyzer {
                     if(this.isTopToken()&&this.isTopTokenType(TokenType.IDENT)){
                         //System.out.println("A procedure call expression was reduced!");
                         nt.addTerminal((Token)this.Stack.pollFirst());
-                    }
-                    else{
-                       // System.out.println("A group expression was reduced!");
                     }
                     if(this.isTopNonTerm())throw new ReductionErrorException();
                     System.out.println(nt.toString()+" was reduced");

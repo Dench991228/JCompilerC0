@@ -15,7 +15,7 @@ public class PriorityMatrix {
     public List<TokenType> OperandTypes;
     public PriorityMatrix() throws FileNotFoundException {
         this.matrix = new HashMap<>();
-        this.OperandTypes = List.of(TokenType.SHARP, TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.LT, TokenType.GE, TokenType.LE, TokenType.ASSIGN, TokenType.AS_KW, TokenType.L_PAREN, TokenType.R_PAREN, TokenType.COMMA, TokenType.NEG, TokenType.TY, TokenType.IDENT, TokenType.STRING_LITERAL, TokenType.UINT_LITERAL);
+        this.OperandTypes = List.of(TokenType.SHARP, TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV, TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.LT, TokenType.GE, TokenType.LE, TokenType.ASSIGN, TokenType.AS_KW, TokenType.L_PAREN, TokenType.R_PAREN, TokenType.COMMA, TokenType.NEG, TokenType.TY, TokenType.IDENT, TokenType.STRING_LITERAL, TokenType.UINT_LITERAL, TokenType.CHAR_LITERAL, TokenType.DOUBLE_LITERAL);
         Scanner sc = new Scanner(new File("operand_priority.md"));
         String new_line = sc.nextLine();
         new_line = sc.nextLine();
