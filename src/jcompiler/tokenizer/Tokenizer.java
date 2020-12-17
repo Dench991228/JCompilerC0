@@ -130,6 +130,7 @@ public class Tokenizer {
         }
         StartNode.addTransfer('_', ident_node);
 
+        /*初始节点到整数节点*/
         char cur_digit = '0';
         for(int i=0;i<10;i++){
             StartNode.addTransfer(cur_digit, integer_node);
@@ -180,7 +181,7 @@ public class Tokenizer {
         ident_node.addTransfer('_', ident_node);
         cur_digit = '0';
         for(int i=0;i<10;i++){
-            ident_node.addTransfer(cur_digit, integer_node);
+            ident_node.addTransfer(cur_digit, ident_node);
             cur_digit++;
         }
 
