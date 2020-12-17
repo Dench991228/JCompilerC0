@@ -264,12 +264,12 @@ public class Tokenizer {
         /*只要没遇到换行就一直在double_div这里循环*/
         for(char c=0; c<=(char)(65534);c++){
             if(c!='\n'){
-                double_div.addTransfer(c, div_node);
+                double_div.addTransfer(c, double_div);
             }
         }
         /*遇到换行，就结束注释*/
         StateNode comment_finish = new StateNode(true, TokenType.CMT);
-        div_node.addTransfer('\n', comment_finish);
+        double_div.addTransfer('\n', comment_finish);
     }
     /*初始化状态图，运算符方面*/
     static{
@@ -355,9 +355,11 @@ public class Tokenizer {
                     break;
             }
             if(result.getType()==TokenType.CMT){
+                //System.out.println("comment was found!");
                 return getToken();
             }
             else{
+                //System.out.println(result.getType());
                 return result;
             }
         }

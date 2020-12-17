@@ -75,6 +75,7 @@ public class StmtAnalyzer {
     /*解析if语句*/
     private void analyseIfStmt(){
         Analyzer.putReturnState();
+        Analyzer.putLoopState(false);
         this.Util.expect(TokenType.IF_KW);
         this.ExprAnalyzer.analyseExpr();
         this.analyseBlockStmt();
@@ -90,9 +91,10 @@ public class StmtAnalyzer {
                 this.ExprAnalyzer.analyseExpr();
                 Analyzer.putReturnState();
                 this.analyseBlockStmt();
-                Analyzer.LoopState.pollLast();
+                Analyzer.ReturnState.pollLast();
             }
         }
+        Analyzer.LoopState.pollLast();
     }
 
     /*解析while语句*/
@@ -100,6 +102,8 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.WHILE_KW);
         this.ExprAnalyzer.analyseExpr();
         Analyzer.putLoopState(true);
+        this.analyseBlockStmt();
+        Analyzer.LoopState.pollLast();
     }
 
     /*解析返回语句*/
@@ -115,13 +119,11 @@ public class StmtAnalyzer {
 
     /*解析语句块*/
     private void analyseBlockStmt(){
-        Analyzer.putLoopState(false);
         this.Util.expect(TokenType.L_BRACE);
         while(this.Util.peek().getType()!=TokenType.R_BRACE){
             this.analyseStatement();
         }
         this.Util.expect(TokenType.R_BRACE);
-        Analyzer.LoopState.pollLast();
     }
 
     /*解析break语句*/
@@ -149,7 +151,9 @@ public class StmtAnalyzer {
                 this.analyseEmptyStmt();
                 break;
             case L_BRACE://语句块
+                Analyzer.putLoopState(false);
                 this.analyseBlockStmt();
+                Analyzer.LoopState.pollLast();
                 break;
             case WHILE_KW://while语句
                 this.analyseWhileStmt();
