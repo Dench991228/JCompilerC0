@@ -310,7 +310,7 @@ public class ExprAnalyzer {
         while(this.Matrix.OperandTypes.contains(this.Util.peek().getType())){
             Token next = this.Util.next();
             /*什么情况下需要把减号变成负号：不是右括号,ident,不是LITERAL,不是type*/
-            if(next.getType()==TokenType.MINUS&&this.isTopToken()&&!this.isTopTokenType(TokenType.UINT_LITERAL)&&!this.isTopTokenType(TokenType.IDENT)&&!this.isTopTokenType(TokenType.TY)&&!this.isTopTokenType(TokenType.STRING_LITERAL)&&!this.isTopTokenType(TokenType.R_PAREN)){
+            if(next.getType()==TokenType.MINUS&&this.isTopToken()&&!this.isTopTokenType(TokenType.UINT_LITERAL)&&!this.isTopTokenType(TokenType.DOUBLE_LITERAL)&&!this.isTopTokenType(TokenType.IDENT)&&!this.isTopTokenType(TokenType.TY)&&!this.isTopTokenType(TokenType.STRING_LITERAL)&&!this.isTopTokenType(TokenType.R_PAREN)){
                 next.setType(TokenType.NEG);
             }
             this.putToken(next);

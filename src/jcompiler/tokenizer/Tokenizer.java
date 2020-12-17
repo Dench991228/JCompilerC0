@@ -153,6 +153,7 @@ public class Tokenizer {
         cur_digit = '0';
         for(int i=0;i<10;i++){
             integer_with_dot.addTransfer(cur_digit, double_no_sci);
+            double_no_sci.addTransfer(cur_digit, double_no_sci);
             cur_digit++;
         }
         /*上述节点遇到e进入e结尾浮点数*/
@@ -331,7 +332,7 @@ public class Tokenizer {
                     result = new Token(TokenType.DOUBLE_LITERAL, double_value, this.StartPos);
                     break;
                 case UINT_LITERAL://数字字面量
-                    int value = Integer.parseInt(this.SavedWord.toString());
+                    long value = Long.parseLong(this.SavedWord.toString());
                     this.SavedWord = new StringBuilder();
                     result = new Token(TokenType.UINT_LITERAL, value, this.StartPos);
                     break;
