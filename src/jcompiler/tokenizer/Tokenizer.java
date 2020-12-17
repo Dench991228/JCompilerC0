@@ -264,7 +264,7 @@ public class Tokenizer {
         /*只要没遇到换行就一直在double_div这里循环*/
         for(char c=0; c<=(char)(65534);c++){
             if(c!='\n'){
-                div_node.addTransfer(c, div_node);
+                double_div.addTransfer(c, div_node);
             }
         }
         /*遇到换行，就结束注释*/

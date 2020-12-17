@@ -1,6 +1,7 @@
 package jcompiler.analyzer;
 
 import jcompiler.analyzer.exceptions.BranchNoReturnException;
+import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
@@ -48,9 +49,10 @@ public class Analyzer {
         }
         this.Util.next();
         this.Util.expect(TokenType.ARROW);
-        this.Util.expect(TokenType.TY);
+        Token t = this.Util.next();
+        if(t.getType()!=TokenType.TY)throw new ErrorTokenTypeException();
         this.StmtAnalyzer.analyseStatement();
-        if(Analyzer.ReturnState.peekLast())throw new BranchNoReturnException();
+        if(!Analyzer.ReturnState.peekLast()&&((String)t.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
     }
 
     /*顶层的分析*/
@@ -86,7 +88,6 @@ public class Analyzer {
     /*遇到return的时候把栈顶的状态改为true*/
     /*看最后到栈底的元素是不是true*/
     public static void putReturnState(){
-        Analyzer.ReturnState.pollLast();
         Analyzer.ReturnState.addLast(false);
     }
 
