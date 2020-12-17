@@ -73,20 +73,24 @@ public class StmtAnalyzer {
     }
 
     /*解析if语句*/
-    private void analyseIfStmt(boolean inLoop){
+    private void analyseIfStmt(){
+        Analyzer.putReturnState();
         this.Util.expect(TokenType.IF_KW);
         this.ExprAnalyzer.analyseExpr();
-        this.analyseBlockStmt(inLoop);
+        this.analyseBlockStmt();
+        Analyzer.ReturnState.pollLast();
         while(this.Util.peek().getType()==TokenType.ELSE_KW){
             this.Util.next();
             if(this.Util.peek().getType()==TokenType.L_BRACE){//左大括号，不会有elif了
-                this.analyseBlockStmt(inLoop);
+                this.analyseBlockStmt();
                 break;
             }
             else{
                 this.Util.expect(TokenType.IF_KW);
                 this.ExprAnalyzer.analyseExpr();
-                this.analyseBlockStmt(inLoop);
+                Analyzer.putReturnState();
+                this.analyseBlockStmt();
+                Analyzer.LoopState.pollLast();
             }
         }
     }
@@ -95,12 +99,14 @@ public class StmtAnalyzer {
     private void analyseWhileStmt(){
         this.Util.expect(TokenType.WHILE_KW);
         this.ExprAnalyzer.analyseExpr();
-        this.analyseBlockStmt(true);
+        Analyzer.putLoopState(true);
     }
 
     /*解析返回语句*/
     private void analyseReturnStmt(){
         this.Util.expect(TokenType.RETURN_KW);
+        Analyzer.ReturnState.pollLast();
+        Analyzer.ReturnState.addLast(true);
         if(this.Util.nextIf(TokenType.SEMICOLON)==null){
             this.ExprAnalyzer.analyseExpr();
             this.Util.expect(TokenType.SEMICOLON);
@@ -108,12 +114,14 @@ public class StmtAnalyzer {
     }
 
     /*解析语句块*/
-    private void analyseBlockStmt(boolean inLoop){
+    private void analyseBlockStmt(){
+        Analyzer.putLoopState(false);
         this.Util.expect(TokenType.L_BRACE);
         while(this.Util.peek().getType()!=TokenType.R_BRACE){
-            this.analyseStatement(inLoop);
+            this.analyseStatement();
         }
         this.Util.expect(TokenType.R_BRACE);
+        Analyzer.LoopState.pollLast();
     }
 
     /*解析break语句*/
@@ -134,20 +142,20 @@ public class StmtAnalyzer {
     }
 
     /*对外服务，语句分析*/
-    public void analyseStatement(boolean inLoop){
+    public void analyseStatement(){
         Token t = this.Util.peek();
         switch(t.getType()){
             case SEMICOLON://空语句
                 this.analyseEmptyStmt();
                 break;
             case L_BRACE://语句块
-                this.analyseBlockStmt(inLoop);
+                this.analyseBlockStmt();
                 break;
             case WHILE_KW://while语句
                 this.analyseWhileStmt();
                 break;
             case IF_KW://if语句
-                this.analyseIfStmt(inLoop);
+                this.analyseIfStmt();
                 break;
             case LET_KW://这两个都是声明
             case CONST_KW:
@@ -157,11 +165,11 @@ public class StmtAnalyzer {
                 this.analyseReturnStmt();
                 break;
             case BREAK_KW:
-                if(inLoop)this.analyseBreakStmt();
+                if(Analyzer.LoopState.peekLast())this.analyseBreakStmt();
                 else throw new LoopControlException();
                 break;
             case CONTINUE_KW:
-                if(inLoop)this.analyseContinueStmt();
+                if(Analyzer.LoopState.peekLast())this.analyseContinueStmt();
                 else throw new LoopControlException();
                 break;
             default://运算式
