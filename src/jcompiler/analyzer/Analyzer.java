@@ -82,6 +82,9 @@ public class Analyzer {
         this.Util.next();
         this.Util.expect(TokenType.ARROW);
         Token function_type = this.Util.next(TokenType.TY);
+        if(function_type.getValue().toString().compareTo("double")==0)function_type=Token.DOUBLE;
+        else if(function_type.getValue().toString().compareTo("int")==0) function_type=Token.INTEGER;
+        else function_type=Token.VOID;
         Analyzer.ExpectedReturnType = function_type;
         /*创建函数的表项*/
         SymbolEntry function_entry = SymbolEntry.getFunctionEntry(function_type, params, function_ident.getStartPos());

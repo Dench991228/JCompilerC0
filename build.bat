@@ -1,0 +1,1 @@
+javac -sourcepath src src/jcompiler/JCompiler.java -d . -encoding utf8

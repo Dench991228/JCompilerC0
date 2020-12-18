@@ -32,7 +32,7 @@ public class StmtAnalyzer {
 
     /*解析运算式语句*/
     private void analyseExpression(){
-        this.ExprAnalyzer.analyseExpr();
+        this.ExprAnalyzer.analyseExpr(null);
         this.Util.expect(TokenType.SEMICOLON);
     }
 
@@ -47,11 +47,13 @@ public class StmtAnalyzer {
                 variable_ident = this.Util.next(TokenType.IDENT);
                 this.Util.expect(TokenType.COLON);
                 variable_type = this.Util.next(TokenType.TY);
+                if(variable_type.getValue().toString().compareTo("double")==0)variable_type=Token.DOUBLE;
+                else if(variable_type.getValue().toString().compareTo("int")==0)variable_type=Token.INTEGER;
                 if(variable_type.getValue().toString().compareTo("void")==0)throw new ErrorTokenTypeException();
                 boolean isInitialized = false;
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
                     isInitialized = true;
-                    this.ExprAnalyzer.analyseExpr();
+                    this.ExprAnalyzer.analyseExpr(variable_type);
                 }
                 this.Util.expect(TokenType.SEMICOLON);
                 SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
@@ -64,8 +66,10 @@ public class StmtAnalyzer {
                 this.Util.expect(TokenType.COLON);
                 variable_type = this.Util.next(TokenType.TY);
                 if(variable_type.getValue().toString().compareTo("void")==0)throw new ErrorTokenTypeException();
+                if(variable_type.getValue().toString().compareTo("double")==0)variable_type=Token.DOUBLE;
+                else if(variable_type.getValue().toString().compareTo("int")==0)variable_type=Token.INTEGER;
                 this.Util.expect(TokenType.ASSIGN);
-                this.ExprAnalyzer.analyseExpr();
+                this.ExprAnalyzer.analyseExpr(variable_type);
                 this.Util.expect(TokenType.SEMICOLON);
                 SymbolEntry const_entry = SymbolEntry.getVariableEntry(variable_type, true, variable_ident.getStartPos());
                 Analyzer.AnalyzerTable.putIdent(variable_ident, const_entry);
@@ -81,7 +85,7 @@ public class StmtAnalyzer {
         Analyzer.putReturnState();
         Analyzer.putLoopState(false);
         this.Util.expect(TokenType.IF_KW);
-        this.ExprAnalyzer.analyseExpr();
+        this.ExprAnalyzer.analyseExpr(Token.INTEGER);
         this.analyseBlockStmt();
         Analyzer.ReturnState.pollLast();
         while(this.Util.peek().getType()==TokenType.ELSE_KW){
@@ -92,7 +96,7 @@ public class StmtAnalyzer {
             }
             else{
                 this.Util.expect(TokenType.IF_KW);
-                this.ExprAnalyzer.analyseExpr();
+                this.ExprAnalyzer.analyseExpr(Token.INTEGER);
                 Analyzer.putReturnState();
                 this.analyseBlockStmt();
                 Analyzer.ReturnState.pollLast();
@@ -104,7 +108,7 @@ public class StmtAnalyzer {
     /*解析while语句*/
     private void analyseWhileStmt(){
         this.Util.expect(TokenType.WHILE_KW);
-        this.ExprAnalyzer.analyseExpr();
+        this.ExprAnalyzer.analyseExpr(Token.INTEGER);
         Analyzer.putLoopState(true);
         Analyzer.putReturnState();
         this.analyseBlockStmt();
@@ -119,7 +123,7 @@ public class StmtAnalyzer {
         Analyzer.ReturnState.addLast(true);
         if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){
             if(this.Util.peek().getType()==TokenType.SEMICOLON)throw new ReturnTypeError();
-            this.ExprAnalyzer.analyseExpr();
+            this.ExprAnalyzer.analyseExpr(Analyzer.ExpectedReturnType);
         }
         this.Util.expect(TokenType.SEMICOLON);
     }

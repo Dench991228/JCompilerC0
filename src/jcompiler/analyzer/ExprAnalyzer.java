@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.analyzer.exceptions.ExpressionTypeException;
 import jcompiler.analyzer.exceptions.IdentifierTypeException;
 import jcompiler.analyzer.exceptions.ReductionErrorException;
 import jcompiler.tokenizer.Token;
@@ -79,6 +80,7 @@ public class ExprAnalyzer {
 
     /*二元运算符的集合*/
     private static Set<TokenType> BinaryOperands = new HashSet<>();
+
     static{//初始化过程：获得二元运算符
         Scanner sc = null;
         try {
@@ -94,6 +96,7 @@ public class ExprAnalyzer {
             e.printStackTrace();
         }
     }
+
     public ExprAnalyzer(AnalyzerUtil util) throws FileNotFoundException {
         this.Util = util;
         this.Stack = new LinkedList<>();
@@ -106,10 +109,12 @@ public class ExprAnalyzer {
         }
         return null;
     }
+
     /*判断栈顶是不是token*/
     private boolean isTopToken(){
         return this.Stack.peekFirst() instanceof Token;
     }
+
     /*判断栈顶是不是特定的Token类型*/
     private boolean isTopTokenType(TokenType tt){
         if(!isTopToken())return false;
@@ -119,10 +124,12 @@ public class ExprAnalyzer {
             return t.getType() == tt;
         }
     }
+
     /*判断栈顶是不是非终结符*/
     private boolean isTopNonTerm(){
         return this.Stack.peekFirst() instanceof NonTerminal;
     }
+
     /*判断栈顶是不是特定的非终结符*/
     private boolean isTopNonTermType(NonTerminalType ntt){
         if(!isTopNonTerm())return false;
@@ -142,8 +149,8 @@ public class ExprAnalyzer {
             switch (t.getType()){
                 case IDENT://标识符
                     nt.addTerminal(t);
-                    Analyzer.AnalyzerTable.findVariable(t);
-                    nt.ResultType = t;
+                    Token token_type = Analyzer.AnalyzerTable.findVariable(t).getType();
+                    nt.ResultType = token_type;
                     if(this.isTopNonTerm()){
                         //System.out.println(this.Stack.peekFirst());
                         throw new ReductionErrorException();
@@ -152,8 +159,28 @@ public class ExprAnalyzer {
                     System.out.println(nt.toString()+" was reduced");
                     return;
                 case DOUBLE_LITERAL:
+                    nt.addTerminal(t);
+                    nt.ResultType = Token.DOUBLE;
+                    /*两个非终结符挨在一起，那就有问题*/
+                    if(this.isTopNonTerm()){
+                        //System.out.println(this.Stack.peekFirst());
+                        throw new ReductionErrorException();
+                    }
+                    this.Stack.addFirst(nt);
+                    System.out.println(nt.toString()+" was reduced");
+                    return;
                 case UINT_LITERAL://整数字面量
                 case CHAR_LITERAL:
+                    nt.addTerminal(t);
+                    nt.ResultType = Token.INTEGER;
+                    /*两个非终结符挨在一起，那就有问题*/
+                    if(this.isTopNonTerm()){
+                        //System.out.println(this.Stack.peekFirst());
+                        throw new ReductionErrorException();
+                    }
+                    this.Stack.addFirst(nt);
+                    System.out.println(nt.toString()+" was reduced");
+                    return;
                 case STRING_LITERAL://字符串字面量
                     //System.out.println("A literal expression or a identifier expression was reduced!");
                     nt.addTerminal(t);
@@ -189,16 +216,24 @@ public class ExprAnalyzer {
                     }
                     //有参数的函数调用或者括号表达式
                     if(!this.isTopNonTerm())throw new ReductionErrorException();
-                    nt.addNonTerminal((NonTerminal) this.Stack.pollFirst());//把顶上的parameter_list或者expr进栈
+                    NonTerminal top_nt = (NonTerminal) this.Stack.pollFirst();
+                    nt.addNonTerminal(top_nt);//把顶上的parameter_list或者expr进栈
+                    Token type = top_nt.ResultType;
                     if(!this.isTopToken()||!this.isTopTokenType(TokenType.L_PAREN)){
                         //System.out.println(nt.toString());
                         throw new ReductionErrorException();
                     }
-                    nt.addTerminal((Token) this.Stack.pollFirst());
+                    nt.addTerminal((Token) this.Stack.pollFirst());//左括号
                     /*瞅一眼前面有没有ident，如果有，就放进去*/
+                    //顺便决定一波nt的类型
                     if(this.isTopToken()&&this.isTopTokenType(TokenType.IDENT)){
                         //System.out.println("A procedure call expression was reduced!");
-                        nt.addTerminal((Token)this.Stack.pollFirst());
+                        Token function_ident = (Token)this.Stack.pollFirst();
+                        nt.ResultType = Analyzer.AnalyzerTable.findFunction(function_ident).getType();
+                        nt.addTerminal(function_ident);
+                    }
+                    else{
+                        nt.ResultType = type;
                     }
                     if(this.isTopNonTerm())throw new ReductionErrorException();
                     System.out.println(nt.toString()+" was reduced");
@@ -208,6 +243,12 @@ public class ExprAnalyzer {
                     //System.out.println("A type change expression was reduced!");
                     nt.addTerminal(t);
                     if(((String)t.getValue()).compareTo("void")==0)throw new ReductionErrorException();
+                    if(t.getValue().toString().compareTo("double")==0){
+                        nt.ResultType = Token.DOUBLE;
+                    }
+                    else if(t.getValue().toString().compareTo("int")==0){
+                        nt.ResultType = Token.VOID;
+                    }
                     /*判断接下来是不是as关键字*/
                     if(!(this.Stack.peekFirst() instanceof Token)||(((Token) this.Stack.peekFirst()).getType())!=TokenType.AS_KW){
                         throw new ReductionErrorException();
@@ -233,23 +274,33 @@ public class ExprAnalyzer {
             if(!this.isTopNonTermType(NonTerminalType.EXPR))throw new ReductionErrorException();
             //System.out.println("reduceExpr: whether the terminal on the top is binary_operand:"+ BinaryOperands.contains(this.getTopTerminal().getType()));
             if(!this.isTopToken()&&this.getTopTerminal().getType()==TokenType.NEG){//取反表达式
-                read.addLast(this.Stack.pollFirst());
+                NonTerminal former = (NonTerminal) this.Stack.pollFirst();
+                read.addLast(former);
+                nt.ResultType = former.ResultType;
                 //System.out.println("A negative expression was reduced!");
                 read.addLast(this.Stack.pollFirst());
             }
             else if(!this.isTopToken()&&this.getTopTerminal().getType()==TokenType.ASSIGN){//赋值表达式
-                read.addLast(this.Stack.pollFirst());
+                NonTerminal right_expr = (NonTerminal) this.Stack.pollFirst();
+                read.addLast(right_expr);
                 //System.out.println("An assignment expression was reduced!");
-                read.addLast(this.Stack.pollFirst());
+                read.addLast(this.Stack.pollFirst());//赋值符号
                 if(!this.isTopNonTerm()||!this.isTopNonTermType(NonTerminalType.L_EXPR))throw new ReductionErrorException();
-                read.addLast(this.Stack.pollFirst());
+                NonTerminal left_expr = (NonTerminal) this.Stack.pollFirst();
+                read.addLast(left_expr);
+                if(left_expr.ResultType!=right_expr.ResultType)throw new ExpressionTypeException();
+                nt.ResultType = Token.VOID;
             }
             else if(!this.isTopToken()&&BinaryOperands.contains(this.getTopTerminal().getType())){//运算符表达式
-                read.addLast(this.Stack.pollFirst());
+                NonTerminal right_expr = (NonTerminal) this.Stack.pollFirst();
+                read.addLast(right_expr);
                 //System.out.println("A binary operand expression was reduced!");
                 read.addLast(this.Stack.pollFirst());
                 if(!this.isTopNonTerm()||!this.isTopNonTermType(NonTerminalType.EXPR))throw new ReductionErrorException();
-                read.addLast(this.Stack.pollFirst());
+                NonTerminal left_expr = (NonTerminal) this.Stack.pollFirst();
+                read.addLast(left_expr);
+                if(left_expr.ResultType!=right_expr.ResultType)throw new ExpressionTypeException();
+                nt.ResultType = left_expr.ResultType;
             }
             else{//有问题
                 throw new ReductionErrorException();
@@ -262,6 +313,7 @@ public class ExprAnalyzer {
             this.Stack.addFirst(nt);
         }
     }
+
     /*尝试在栈顶规约出param_list，当且仅当顶端终结符是','，时进行这个规约*/
     /*参数列表形如param_list,expr，或者expr,expr*/
     private void reduceParamList(){
@@ -280,13 +332,16 @@ public class ExprAnalyzer {
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
     }
+
     /*尝试在栈顶规约出L_EXPR*/
     /*形如ident，ident一定是变量*/
     private void reduceLeftExpr(){
         NonTerminal nt = new NonTerminal(NonTerminalType.L_EXPR);
         if(!this.isTopToken()||!this.isTopTokenType(TokenType.IDENT))throw new ReductionErrorException();
         Token top_token = (Token)this.Stack.pollFirst();
-        if(Analyzer.AnalyzerTable.findVariable(top_token).isConst())throw new IdentifierTypeException();
+        SymbolEntry variable_entry = Analyzer.AnalyzerTable.findVariable(top_token);
+        if(variable_entry.isConst())throw new IdentifierTypeException();
+        nt.ResultType = variable_entry.getType();
         nt.addTerminal(top_token);
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
@@ -326,7 +381,7 @@ public class ExprAnalyzer {
         this.Stack.addFirst(token);
     }
     /*解析一个expr*/
-    public void analyseExpr(){
+    public void analyseExpr(Token expected_type){
         /*添加sharp符号在开始时*/
         this.Stack.addFirst(new Token(TokenType.SHARP, 0, new Pos(-1,-1)));
         while(this.Matrix.OperandTypes.contains(this.Util.peek().getType())){
