@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.analyzer.exceptions.IdentifierTypeException;
 import jcompiler.analyzer.exceptions.ReductionErrorException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
@@ -21,6 +22,7 @@ enum NonTerminalType{
         return this.name();
     }
 }
+
 class NonTerminal{
     /*非终结符的种类*/
     private NonTerminalType Type;
@@ -65,6 +67,7 @@ class NonTerminal{
         return sb.toString();
     }
 }
+
 /*专门用来进行expr的分析，使用opg完成*/
 public class ExprAnalyzer {
     /*基础设施*/
@@ -138,13 +141,23 @@ public class ExprAnalyzer {
             Token t = (Token)this.Stack.pollFirst();
             switch (t.getType()){
                 case IDENT://标识符
-                case UINT_LITERAL://整数字面量
+                    nt.addTerminal(t);
+                    Analyzer.AnalyzerTable.findVariable(t);
+                    nt.ResultType = t;
+                    if(this.isTopNonTerm()){
+                        //System.out.println(this.Stack.peekFirst());
+                        throw new ReductionErrorException();
+                    }
+                    this.Stack.addFirst(nt);
+                    System.out.println(nt.toString()+" was reduced");
+                    return;
                 case DOUBLE_LITERAL:
+                case UINT_LITERAL://整数字面量
                 case CHAR_LITERAL:
-                case STRING_LITERAL://字面量
+                case STRING_LITERAL://字符串字面量
                     //System.out.println("A literal expression or a identifier expression was reduced!");
                     nt.addTerminal(t);
-                    Analyzer.AnalyzerTable.findVariable(t);//看一眼找不找得到这个token
+                    nt.ResultType = t;
                     /*两个非终结符挨在一起，那就有问题*/
                     if(this.isTopNonTerm()){
                         //System.out.println(this.Stack.peekFirst());
@@ -165,7 +178,9 @@ public class ExprAnalyzer {
                             throw new ReductionErrorException();
                         }
                         else{
-                            t = (Token)this.Stack.pollFirst();
+                            t = (Token)this.Stack.pollFirst();//函数标识符
+                            SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(t);
+                            nt.ResultType = function_entry.getType();
                             nt.addTerminal(t);
                             if(this.isTopNonTerm())throw new ReductionErrorException();
                             else this.Stack.addFirst(nt);
@@ -270,7 +285,9 @@ public class ExprAnalyzer {
     private void reduceLeftExpr(){
         NonTerminal nt = new NonTerminal(NonTerminalType.L_EXPR);
         if(!this.isTopToken()||!this.isTopTokenType(TokenType.IDENT))throw new ReductionErrorException();
-        nt.addTerminal((Token)this.Stack.pollFirst());
+        Token top_token = (Token)this.Stack.pollFirst();
+        if(Analyzer.AnalyzerTable.findVariable(top_token).isConst())throw new IdentifierTypeException();
+        nt.addTerminal(top_token);
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
     }
