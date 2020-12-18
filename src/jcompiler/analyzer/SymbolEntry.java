@@ -31,7 +31,7 @@ public class SymbolEntry {
     }
 
     /*获得一个变量的表项*/
-    public SymbolEntry getVariableEntry(Token variable_type,boolean is_constant, Pos decl_pos){
+    public static SymbolEntry getVariableEntry(Token variable_type,boolean is_constant, Pos decl_pos){
         SymbolEntry entry = new SymbolEntry();
         entry.IsConst = is_constant;
         entry.Type = variable_type;
@@ -42,7 +42,7 @@ public class SymbolEntry {
     }
 
     /*获取一个函数的表项*/
-    public SymbolEntry getFunctionEntry(Token return_type, LinkedList<Token> param_types, Pos decl_pos){
+    public static SymbolEntry getFunctionEntry(Token return_type, LinkedList<Token> param_types, Pos decl_pos){
         SymbolEntry entry = new SymbolEntry();
         entry.Type = return_type;
         entry.IsVar = false;

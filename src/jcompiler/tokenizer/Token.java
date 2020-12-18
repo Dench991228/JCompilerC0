@@ -6,6 +6,9 @@ public class Token {
     private TokenType Type;
     private Object Value;
     private Pos StartPos;
+    public static final Token INTEGER = new Token(TokenType.TY, "int", new Pos(-1,-1));
+    public static final Token DOUBLE = new Token(TokenType.TY, "double", new Pos(-1,-1));
+    public static final Token VOID = new Token(TokenType.TY, "void", new Pos(-1,-1));
     public Token(TokenType t, Object v,Pos s){
         this.Type = t;
         this.Value = v;

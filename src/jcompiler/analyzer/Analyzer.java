@@ -5,6 +5,7 @@ import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
+import jcompiler.util.Pos;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
@@ -21,6 +22,28 @@ public class Analyzer {
     /*用来记录各层嵌套是不是在循环里面*/
     public static LinkedList<Boolean> LoopState = new LinkedList<>();
 
+    public static SymbolTable AnalyzerTable;
+    /*初始化标准库*/
+    static{
+        AnalyzerTable = new SymbolTable();
+        SymbolEntry getInt = SymbolEntry.getFunctionEntry(Token.INTEGER, new LinkedList<Token>(), new Pos(-1,-1));
+        SymbolEntry getDouble = SymbolEntry.getFunctionEntry(Token.DOUBLE, new LinkedList<Token>(), new Pos(-1,-1));
+        SymbolEntry getChar = SymbolEntry.getFunctionEntry(Token.INTEGER, new LinkedList<Token>(), new Pos(-1,-1));
+        LinkedList<Token> param_putInt = new LinkedList<>();
+        param_putInt.addLast(Token.INTEGER);
+        SymbolEntry putInt = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        SymbolEntry putChar = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        SymbolEntry putStr = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        SymbolEntry putLn = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getint", new Pos(-1,-1)), getInt);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getdouble", new Pos(-1,-1)), getDouble);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getchar", new Pos(-1,-1)), getChar);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putint", new Pos(-1,-1)), putInt);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putchar", new Pos(-1,-1)), putChar);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putstr", new Pos(-1,-1)), putStr);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putln", new Pos(-1,-1)), putLn);
+    }
     public Analyzer(AnalyzerUtil util) throws FileNotFoundException {
         this.StmtAnalyzer = new StmtAnalyzer(util);
         this.Util = util;
