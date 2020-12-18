@@ -121,4 +121,14 @@ public class Analyzer {
         ReturnState.addLast(false);
         LoopState.addLast(false);
     }
+
+    /*进入新的作用域的时候，要重新创建一张符号表*/
+    public static void addSymbolTable(){
+        AnalyzerTable = new SymbolTable(Analyzer.AnalyzerTable);
+    }
+
+    /*退出一个作用域时，需要回退符号表*/
+    public static void withdraw(){
+        Analyzer.AnalyzerTable = Analyzer.AnalyzerTable.getFatherTable();
+    }
 }
