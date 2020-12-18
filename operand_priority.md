@@ -21,5 +21,5 @@ ty|r|r|r|r|r|r|r|r|r|r|r|e|r|r|r|r|r|e|e|e|e|e|e
 ident|r|r|r|r|r|r|r|r|r|r|r|r|r|s|r|r|e|e|e|e|e|e|e
 str|r|e|e|e|e|e|e|e|e|e|e|e|e|e|r|r|e|e|e|e|e|e|e
 uint|r|r|r|r|r|r|r|r|r|r|r|e|r|s|r|r|e|e|e|e|e|e|e
-char|r|e|e|e|e|e|e|e|e|e|e|e|e|e|r|r|e|e|e|e|e|e|e
+char|r|r|r|r|r|r|r|r|r|r|r|e|r|s|r|r|e|e|e|e|e|e|e
 double|r|r|r|r|r|r|r|r|r|r|r|e|r|s|r|r|e|e|e|e|e|e|e

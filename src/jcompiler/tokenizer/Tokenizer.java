@@ -159,6 +159,9 @@ public class Tokenizer {
         /*上述节点遇到e进入e结尾浮点数*/
         StateNode double_with_e = new StateNode(false, null);
         double_no_sci.addTransfer('e', double_with_e);
+        double_no_sci.addTransfer('E', double_with_e);
+        /*TODO 可能遇到加号或者减号*/
+
         /*上述节点遇到整数进入合法的科学计数法浮点数*/
         /*double_sci遇到整数还在自己这里*/
         StateNode double_sci = new StateNode(true,TokenType.DOUBLE_LITERAL);
@@ -324,7 +327,8 @@ public class Tokenizer {
                     name = name.substring(1, name.length()-1);
                     name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
                     name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
-                    result = new Token(TokenType.CHAR_LITERAL, name, this.StartPos);
+                    char c = name.charAt(0);
+                    result = new Token(TokenType.CHAR_LITERAL, (int)(c), this.StartPos);
                     break;
                 case DOUBLE_LITERAL:
                     double double_value = Double.parseDouble(this.SavedWord.toString());
