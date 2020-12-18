@@ -157,7 +157,9 @@ public class StmtAnalyzer {
                 break;
             case L_BRACE://语句块
                 Analyzer.putLoopState(false);
+                Analyzer.addSymbolTable();
                 this.analyseBlockStmt();
+                Analyzer.withdraw();
                 Analyzer.LoopState.pollLast();
                 break;
             case WHILE_KW://while语句
