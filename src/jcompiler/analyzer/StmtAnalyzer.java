@@ -102,7 +102,9 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.WHILE_KW);
         this.ExprAnalyzer.analyseExpr();
         Analyzer.putLoopState(true);
+        Analyzer.putReturnState();
         this.analyseBlockStmt();
+        Analyzer.ReturnState.pollLast();
         Analyzer.LoopState.pollLast();
     }
 
