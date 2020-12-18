@@ -37,6 +37,12 @@ public class AnalyzerUtil {
         }
         return t;
     }
+    //前进道下一个token，如果不是特定类型就抛出异常
+    public Token next(TokenType tt)throws ErrorTokenTypeException{
+        Token t = this.next();
+        if(t.getType()!=tt)throw new ErrorTokenTypeException();
+        else return t;
+    }
     // 检查一下下一个token是不是这个类型
     public boolean check(TokenType tt)throws UnknownTokenException{
         return this.peek().getType()==tt;

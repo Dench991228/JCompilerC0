@@ -50,32 +50,40 @@ public class Analyzer {
     }
 
     /*解析一个函数的参数*/
-    private void analyseParamDecl() {
+    private void analyseParamDecl(LinkedList<Token> params) {
         /*看一眼有没有const*/
         this.Util.nextIf(TokenType.CONST_KW);
         this.Util.expect(TokenType.IDENT);
         this.Util.expect(TokenType.COLON);
-        this.Util.expect(TokenType.TY);
+        Token param_type = this.Util.next(TokenType.TY);
+        params.addLast(param_type);
     }
 
     /*解析一个函数*/
     private void analyseFunction(){
         Analyzer.resetStacks();
+        /*fn*/
         this.Util.expect(TokenType.FN_KW);
-        this.Util.expect(TokenType.IDENT);
+        /*函数的标识符*/
+        Token function_ident = this.Util.next(TokenType.IDENT);
+        LinkedList<Token> params = new LinkedList<>();//函数的参数列表，里面全部是type
         this.Util.expect(TokenType.L_PAREN);
+        /*解析参数列表*/
         while(this.Util.peek().getType()!=TokenType.R_PAREN){
-            this.analyseParamDecl();
+            this.analyseParamDecl(params);
             if(this.Util.peek().getType()!=TokenType.R_PAREN){
                 this.Util.expect(TokenType.COMMA);
             }
         }
         this.Util.next();
         this.Util.expect(TokenType.ARROW);
-        Token t = this.Util.next();
-        if(t.getType()!=TokenType.TY)throw new ErrorTokenTypeException();
+        Token function_type = this.Util.next(TokenType.TY);
+        /*创建函数的表项*/
+        SymbolEntry function_entry = SymbolEntry.getFunctionEntry(function_type, params, function_ident.getStartPos());
+        /*把它放到符号表中*/
+        Analyzer.AnalyzerTable.putIdent(function_ident, function_entry);
         this.StmtAnalyzer.analyseStatement();
-        if(!Analyzer.ReturnState.peekLast()&&((String)t.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
+        if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
     }
 
     /*顶层的分析*/
