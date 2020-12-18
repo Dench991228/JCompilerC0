@@ -161,12 +161,16 @@ public class Tokenizer {
         double_no_sci.addTransfer('e', double_with_e);
         double_no_sci.addTransfer('E', double_with_e);
         /*TODO 可能遇到加号或者减号*/
-
+        /*从e出来之后可能遇到一个加号或者减号*/
+        StateNode double_with_e_operand = new StateNode(false, null);
+        double_with_e.addTransfer('+', double_with_e_operand);
+        double_with_e.addTransfer('-', double_with_e_operand);
         /*上述节点遇到整数进入合法的科学计数法浮点数*/
         /*double_sci遇到整数还在自己这里*/
         StateNode double_sci = new StateNode(true,TokenType.DOUBLE_LITERAL);
         cur_digit = '0';
         for(int i=0;i<10;i++){
+            double_with_e_operand.addTransfer(cur_digit, double_sci);
             double_with_e.addTransfer(cur_digit, double_sci);
             double_sci.addTransfer(cur_digit, double_sci);
             cur_digit++;
