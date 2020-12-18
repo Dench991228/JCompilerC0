@@ -38,34 +38,37 @@ public class StmtAnalyzer {
     /*解析声明语句*/
     private void analyseDeclStmt(){
         Token first = this.Util.peek();
+        Token variable_ident;
+        Token variable_type;
         switch (first.getType()){
             case LET_KW:
                 this.Util.next();
-                this.Util.expect(TokenType.IDENT);
+                variable_ident = this.Util.next(TokenType.IDENT);
                 this.Util.expect(TokenType.COLON);
-                if(this.Util.peek().getType()==TokenType.TY){
-                    Token t = this.Util.peek();
-                    if(((String)t.getValue()).compareTo("void")==0){
-                        throw new ErrorTokenTypeException();
-                    }
-                    else this.Util.next();
-                }
-                else{
-                    throw new ErrorTokenTypeException();
-                }
+                variable_type = this.Util.next(TokenType.TY);
+                if(variable_type.getValue().toString().compareTo("void")==0)throw new ErrorTokenTypeException();
+                boolean isInitialized = false;
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
+                    isInitialized = true;
                     this.ExprAnalyzer.analyseExpr();
                 }
                 this.Util.expect(TokenType.SEMICOLON);
+                SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
+                Analyzer.AnalyzerTable.putIdent(variable_ident, entry);
+                if(isInitialized)Analyzer.AnalyzerTable.setInitialized(variable_ident);
                 break;
             case CONST_KW:
                 this.Util.next();
-                this.Util.expect(TokenType.IDENT);
+                variable_ident = this.Util.next(TokenType.IDENT);
                 this.Util.expect(TokenType.COLON);
-                this.Util.expect(TokenType.TY);
+                variable_type = this.Util.next(TokenType.TY);
+                if(variable_type.getValue().toString().compareTo("void")==0)throw new ErrorTokenTypeException();
                 this.Util.expect(TokenType.ASSIGN);
                 this.ExprAnalyzer.analyseExpr();
                 this.Util.expect(TokenType.SEMICOLON);
+                SymbolEntry const_entry = SymbolEntry.getVariableEntry(variable_type, true, variable_ident.getStartPos());
+                Analyzer.AnalyzerTable.putIdent(variable_ident, const_entry);
+                Analyzer.AnalyzerTable.setInitialized(variable_ident);
                 break;
             default:
                 throw new StmtSyntaxException();

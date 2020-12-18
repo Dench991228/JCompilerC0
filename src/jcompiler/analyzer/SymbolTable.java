@@ -62,7 +62,7 @@ public class SymbolTable {
         throw new NotDeclaredException();
     }
 
-    /*放一个identifier进来，可能抛出重复异常*/
+    /*放一个identifier进来，可能抛出重复异常，仅考虑相同作用域*/
     public void putIdent(Token token, SymbolEntry entry) throws RepeatDeclareException {
         String token_name = (String)token.getValue();
         if(this.Table.containsKey(token_name))throw new RepeatDeclareException();
@@ -73,5 +73,10 @@ public class SymbolTable {
 
     public SymbolTable getFatherTable() {
         return FatherTable;
+    }
+
+    public void setInitialized(Token token){
+        SymbolEntry entry = this.findVariable(token);
+        entry.setInitialized(true);
     }
 }
