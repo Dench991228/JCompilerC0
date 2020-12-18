@@ -124,11 +124,13 @@ public class StmtAnalyzer {
 
     /*解析语句块*/
     private void analyseBlockStmt(){
+        Analyzer.addSymbolTable();
         this.Util.expect(TokenType.L_BRACE);
         while(this.Util.peek().getType()!=TokenType.R_BRACE){
             this.analyseStatement();
         }
         this.Util.expect(TokenType.R_BRACE);
+        Analyzer.withdraw();
     }
 
     /*解析break语句*/
@@ -157,9 +159,7 @@ public class StmtAnalyzer {
                 break;
             case L_BRACE://语句块
                 Analyzer.putLoopState(false);
-                Analyzer.addSymbolTable();
                 this.analyseBlockStmt();
-                Analyzer.withdraw();
                 Analyzer.LoopState.pollLast();
                 break;
             case WHILE_KW://while语句
