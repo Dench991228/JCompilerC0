@@ -1,4 +1,4 @@
 package jcompiler.analyzer.exceptions;
 
-public class ParameterTypeException {
+public class ParameterTypeException extends RuntimeException{
 }

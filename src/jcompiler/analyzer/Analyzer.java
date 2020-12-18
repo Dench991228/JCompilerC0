@@ -22,7 +22,11 @@ public class Analyzer {
     /*用来记录各层嵌套是不是在循环里面*/
     public static LinkedList<Boolean> LoopState = new LinkedList<>();
 
+    /*这个语法分析器，当前作用域的符号表*/
     public static SymbolTable AnalyzerTable;
+
+    /*这个语法分析器当前分析函数的期望返回*/
+    public static Token ExpectedReturnType = null;
     /*初始化标准库*/
     static{
         AnalyzerTable = new SymbolTable();
@@ -78,6 +82,7 @@ public class Analyzer {
         this.Util.next();
         this.Util.expect(TokenType.ARROW);
         Token function_type = this.Util.next(TokenType.TY);
+        Analyzer.ExpectedReturnType = function_type;
         /*创建函数的表项*/
         SymbolEntry function_entry = SymbolEntry.getFunctionEntry(function_type, params, function_ident.getStartPos());
         /*把它放到符号表中*/

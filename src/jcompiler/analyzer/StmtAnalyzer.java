@@ -2,6 +2,7 @@ package jcompiler.analyzer;
 
 import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.LoopControlException;
+import jcompiler.analyzer.exceptions.ReturnTypeError;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
@@ -116,10 +117,11 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.RETURN_KW);
         Analyzer.ReturnState.pollLast();
         Analyzer.ReturnState.addLast(true);
-        if(this.Util.nextIf(TokenType.SEMICOLON)==null){
+        if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){
+            if(this.Util.peek().getType()==TokenType.SEMICOLON)throw new ReturnTypeError();
             this.ExprAnalyzer.analyseExpr();
-            this.Util.expect(TokenType.SEMICOLON);
         }
+        this.Util.expect(TokenType.SEMICOLON);
     }
 
     /*解析语句块*/

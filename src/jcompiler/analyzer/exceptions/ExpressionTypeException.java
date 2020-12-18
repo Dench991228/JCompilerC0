@@ -1,4 +1,4 @@
 package jcompiler.analyzer.exceptions;
 
-public class ExpressionTypeException {
+public class ExpressionTypeException extends RuntimeException{
 }
