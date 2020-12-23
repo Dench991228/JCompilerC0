@@ -53,6 +53,7 @@ public class StmtAnalyzer {
                 boolean isInitialized = false;
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
                     isInitialized = true;
+                    this.ExprAnalyzer.setExpectedType(variable_type);
                     this.ExprAnalyzer.analyseExpr(variable_type);
                 }
                 this.Util.expect(TokenType.SEMICOLON);
@@ -69,6 +70,7 @@ public class StmtAnalyzer {
                 if(variable_type.getValue().toString().compareTo("double")==0)variable_type=Token.DOUBLE;
                 else if(variable_type.getValue().toString().compareTo("int")==0)variable_type=Token.INTEGER;
                 this.Util.expect(TokenType.ASSIGN);
+                this.ExprAnalyzer.setExpectedType(variable_type);
                 this.ExprAnalyzer.analyseExpr(variable_type);
                 this.Util.expect(TokenType.SEMICOLON);
                 SymbolEntry const_entry = SymbolEntry.getVariableEntry(variable_type, true, variable_ident.getStartPos());
@@ -121,8 +123,9 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.RETURN_KW);
         Analyzer.ReturnState.pollLast();
         Analyzer.ReturnState.addLast(true);
-        if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){
+        if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){//不是void，那就必须有东西
             if(this.Util.peek().getType()==TokenType.SEMICOLON)throw new ReturnTypeError();
+            this.ExprAnalyzer.setExpectedType(Analyzer.ExpectedReturnType);
             this.ExprAnalyzer.analyseExpr(Analyzer.ExpectedReturnType);
         }
         this.Util.expect(TokenType.SEMICOLON);

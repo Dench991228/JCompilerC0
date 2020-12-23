@@ -77,6 +77,8 @@ public class ExprAnalyzer {
     private LinkedList<Object> Stack;
     /*优先级矩阵*/
     private PriorityMatrix Matrix;
+    /*表达式分析的预期的类型*/
+    private Token expectedType;
 
     /*二元运算符的集合*/
     private static Set<TokenType> BinaryOperands = new HashSet<>();
@@ -141,7 +143,7 @@ public class ExprAnalyzer {
     }
 
     /*尝试在栈顶规约出expr*/
-    private void reduceExpr()throws ReductionErrorException {
+    private NonTerminal reduceExpr()throws ReductionErrorException {
         NonTerminal nt = new NonTerminal(NonTerminalType.EXPR);
         /*栈顶是终结符*/
         if(this.isTopToken()){
@@ -157,7 +159,7 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
-                    return;
+                    return nt;
                 case DOUBLE_LITERAL:
                     nt.addTerminal(t);
                     nt.ResultType = Token.DOUBLE;
@@ -168,7 +170,7 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
-                    return;
+                    return nt;
                 case UINT_LITERAL://整数字面量
                 case CHAR_LITERAL:
                     nt.addTerminal(t);
@@ -180,7 +182,7 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
-                    return;
+                    return nt;
                 case STRING_LITERAL://字符串字面量
                     //System.out.println("A literal expression or a identifier expression was reduced!");
                     nt.addTerminal(t);
@@ -192,7 +194,7 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
-                    return;
+                    return nt;
                 case R_PAREN://函数调用或者括号表达式
                     /*把右括号加进去*/
                     nt.addTerminal(t);
@@ -211,7 +213,7 @@ public class ExprAnalyzer {
                             nt.addTerminal(t);
                             if(this.isTopNonTerm())throw new ReductionErrorException();
                             else this.Stack.addFirst(nt);
-                            return;
+                            return nt;
                         }
                     }
                     //有参数的函数调用或者括号表达式
@@ -238,7 +240,7 @@ public class ExprAnalyzer {
                     if(this.isTopNonTerm())throw new ReductionErrorException();
                     System.out.println(nt.toString()+" was reduced");
                     this.Stack.addFirst(nt);
-                    return;
+                    return nt;
                 case TY://类型转换
                     //System.out.println("A type change expression was reduced!");
                     nt.addTerminal(t);
@@ -262,7 +264,7 @@ public class ExprAnalyzer {
                     if(this.isTopNonTerm())throw new ReductionErrorException();
                     System.out.println(nt.toString()+" was reduced");
                     this.Stack.addFirst(nt);
-                    return;
+                    return nt;
 
                 default:
                     throw new ReductionErrorException();
@@ -311,12 +313,13 @@ public class ExprAnalyzer {
             }
             System.out.println(nt.toString()+" was reduced");
             this.Stack.addFirst(nt);
+            return nt;
         }
     }
 
     /*尝试在栈顶规约出param_list，当且仅当顶端终结符是','，时进行这个规约*/
     /*参数列表形如param_list,expr，或者expr,expr*/
-    private void reduceParamList(){
+    private NonTerminal reduceParamList(){
         NonTerminal nt = new NonTerminal(NonTerminalType.PARAM_LIST);
         /*把顶端的expr放进来*/
         if(!this.isTopNonTerm()||!this.isTopNonTermType(NonTerminalType.EXPR))throw new ReductionErrorException();
@@ -331,11 +334,12 @@ public class ExprAnalyzer {
         nt.addNonTerminal((NonTerminal) this.Stack.pollFirst());
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
+        return nt;
     }
 
     /*尝试在栈顶规约出L_EXPR*/
     /*形如ident，ident一定是变量*/
-    private void reduceLeftExpr(){
+    private NonTerminal reduceLeftExpr(){
         NonTerminal nt = new NonTerminal(NonTerminalType.L_EXPR);
         if(!this.isTopToken()||!this.isTopTokenType(TokenType.IDENT))throw new ReductionErrorException();
         Token top_token = (Token)this.Stack.pollFirst();
@@ -345,19 +349,29 @@ public class ExprAnalyzer {
         nt.addTerminal(top_token);
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
+        return nt;
     }
 
     private void tryReduce(Token token) throws ReductionErrorException{
+        NonTerminal result;
         if(token.getType()==TokenType.ASSIGN){//如果是等号，就尝试规约左值表达式
             System.out.println("a left value expression was reduced!");
-            reduceLeftExpr();
+            result = reduceLeftExpr();
         }
         else if(this.getTopTerminal().getType()==TokenType.COMMA){//如果顶端是逗号，那就尝试规约参数列表
             System.out.println("a parameter list was reduced!");
-            reduceParamList();
+            result = reduceParamList();
         }
         else{
-            reduceExpr();
+            result = reduceExpr();
+        }
+        if(token.getType()==TokenType.SHARP&&this.expectedType!=null){//遇到#，并且当前有预期种类
+            if(result.ResultType!=this.expectedType){
+                throw new ExpressionTypeException();
+            }
+            else{
+                this.expectedType = null;
+            }
         }
     }
 
@@ -393,5 +407,9 @@ public class ExprAnalyzer {
             this.putToken(next);
         }
         this.putToken(new Token(TokenType.SHARP, 0, new Pos(-1,-1)));
+    }
+    /*设置预期类型*/
+    public void setExpectedType(Token type){
+        this.expectedType = type;
     }
 }
