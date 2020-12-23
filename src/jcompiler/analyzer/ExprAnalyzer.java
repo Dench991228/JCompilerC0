@@ -247,7 +247,7 @@ public class ExprAnalyzer {
                         nt.ResultType = Token.DOUBLE;
                     }
                     else if(t.getValue().toString().compareTo("int")==0){
-                        nt.ResultType = Token.VOID;
+                        nt.ResultType = Token.INTEGER;
                     }
                     /*判断接下来是不是as关键字*/
                     if(!(this.Stack.peekFirst() instanceof Token)||(((Token) this.Stack.peekFirst()).getType())!=TokenType.AS_KW){
