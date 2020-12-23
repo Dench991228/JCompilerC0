@@ -2,6 +2,7 @@ package jcompiler.analyzer;
 
 import jcompiler.analyzer.exceptions.BranchNoReturnException;
 import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
+import jcompiler.analyzer.exceptions.IdentifierTypeException;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
@@ -38,7 +39,10 @@ public class Analyzer {
         SymbolEntry putInt = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
         SymbolEntry putChar = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
         SymbolEntry putStr = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
-        SymbolEntry putLn = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        SymbolEntry putLn = SymbolEntry.getFunctionEntry(Token.VOID, new LinkedList<>(), new Pos(-1,-1));
+        LinkedList<Token> param_single_double = new LinkedList<>();
+        param_single_double.addLast(Token.DOUBLE);
+        SymbolEntry putDouble = SymbolEntry.getFunctionEntry(Token.DOUBLE, param_single_double, new Pos(-1,-1));
 
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getint", new Pos(-1,-1)), getInt);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getdouble", new Pos(-1,-1)), getDouble);
@@ -47,6 +51,7 @@ public class Analyzer {
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putchar", new Pos(-1,-1)), putChar);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putstr", new Pos(-1,-1)), putStr);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putln", new Pos(-1,-1)), putLn);
+        AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putdouble", new Pos(-1,-1)), putDouble);
     }
     public Analyzer(AnalyzerUtil util) throws FileNotFoundException {
         this.StmtAnalyzer = new StmtAnalyzer(util);
@@ -57,10 +62,17 @@ public class Analyzer {
     private void analyseParamDecl(LinkedList<Token> params) {
         /*看一眼有没有const*/
         this.Util.nextIf(TokenType.CONST_KW);
-        this.Util.expect(TokenType.IDENT);
+        Token param_ident = this.Util.next(TokenType.IDENT);
         this.Util.expect(TokenType.COLON);
         Token param_type = this.Util.next(TokenType.TY);
+        if(param_type.getValue().toString().compareTo("int")==0)param_type = Token.INTEGER;
+        else if(param_type.getValue().toString().compareTo("double")==0)param_type = Token.DOUBLE;
+        else throw new IdentifierTypeException();
         params.addLast(param_type);
+        SymbolEntry param_entry = SymbolEntry.getVariableEntry(param_type, false, param_ident.getStartPos());
+        /*把这个参数加入到符号表中，并且设置为已经初始化*/
+        AnalyzerTable.putIdent(param_ident, param_entry);
+        AnalyzerTable.setInitialized(param_ident);
     }
 
     /*解析一个函数*/
@@ -72,7 +84,9 @@ public class Analyzer {
         Token function_ident = this.Util.next(TokenType.IDENT);
         LinkedList<Token> params = new LinkedList<>();//函数的参数列表，里面全部是type
         this.Util.expect(TokenType.L_PAREN);
-        /*解析参数列表*/
+        Analyzer.addSymbolTable();
+        /*解析参数列表，如果有参数的话*/
+        /*参数列表里面的形参和函数内部的东西在一个作用域里面*/
         while(this.Util.peek().getType()!=TokenType.R_PAREN){
             this.analyseParamDecl(params);
             if(this.Util.peek().getType()!=TokenType.R_PAREN){
@@ -88,10 +102,12 @@ public class Analyzer {
         Analyzer.ExpectedReturnType = function_type;
         /*创建函数的表项*/
         SymbolEntry function_entry = SymbolEntry.getFunctionEntry(function_type, params, function_ident.getStartPos());
-        /*把它放到符号表中*/
-        Analyzer.AnalyzerTable.putIdent(function_ident, function_entry);
-        this.StmtAnalyzer.analyseStatement();
+        /*把它放到当前符号表的上级符号表中*/
+        Analyzer.AnalyzerTable.getFatherTable().putIdent(function_ident, function_entry);
+        this.StmtAnalyzer.analyseBlockStmt();
+        /*如果函数内部没有返回，看一眼是不是void*/
         if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
+        Analyzer.withdraw();
     }
 
     /*顶层的分析*/
