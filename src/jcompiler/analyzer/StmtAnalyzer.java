@@ -132,7 +132,9 @@ public class StmtAnalyzer {
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
         Analyzer.putLoopState(true);
         Analyzer.putReturnState();
+        Analyzer.addSymbolTable();
         this.analyseBlockStmt();
+        Analyzer.withdraw();
         Analyzer.ReturnState.pollLast();
         Analyzer.LoopState.pollLast();
     }
