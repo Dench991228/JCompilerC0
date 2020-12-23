@@ -140,6 +140,7 @@ public class Analyzer {
     }
 
     /*分析进入一个分支的时候调用这个函数，如果是if或者elif那就入栈一个状态，否则不管*/
+    /*只管分支，不管别的*/
     /*遇到return的时候把栈顶的状态改为true*/
     /*看最后到栈底的元素是不是true*/
     public static void putReturnState(){

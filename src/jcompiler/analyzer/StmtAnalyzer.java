@@ -19,6 +19,9 @@ public class StmtAnalyzer {
     /*使用的opg analyzer*/
     private ExprAnalyzer ExprAnalyzer;
 
+    /*是不是在第一个if语句中*/
+    private boolean FirstIf;
+
     /*无参数创建analyzer*/
     public StmtAnalyzer(){
         super();
@@ -83,26 +86,42 @@ public class StmtAnalyzer {
     }
 
     /*解析if语句*/
+    /*进入if语句的时候，在返回状态栈里面放入一个新状态，表明这一系列if-else语句的返回状态*/
+
     private void analyseIfStmt(){
-        Analyzer.putReturnState();
+        boolean has_branch_no_return = false;//有没有分支没返回
+        boolean has_else_clause = false;//有没有else语句
+        Analyzer.ReturnState.addLast(false);
         Analyzer.putLoopState(false);
         this.Util.expect(TokenType.IF_KW);
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
+        this.FirstIf=true;
         this.analyseBlockStmt();
-        Analyzer.ReturnState.pollLast();
+        this.FirstIf=false;
+        boolean last_state = Analyzer.ReturnState.pollLast();
+        if(!last_state)has_branch_no_return = true;
         while(this.Util.peek().getType()==TokenType.ELSE_KW){
             this.Util.next();
             if(this.Util.peek().getType()==TokenType.L_BRACE){//左大括号，不会有elif了
+                Analyzer.ReturnState.addLast(false);
                 this.analyseBlockStmt();
+                last_state = Analyzer.ReturnState.pollLast();
+                if(!last_state)has_branch_no_return = true;
+                has_else_clause = true;
                 break;
             }
             else{
                 this.Util.expect(TokenType.IF_KW);
                 this.ExprAnalyzer.analyseExpr(Token.INTEGER);
-                Analyzer.putReturnState();
+                Analyzer.ReturnState.addLast(false);
                 this.analyseBlockStmt();
-                Analyzer.ReturnState.pollLast();
+                last_state = Analyzer.ReturnState.pollLast();
+                if(!last_state)has_branch_no_return = true;
             }
+        }
+        if(!has_branch_no_return&&has_else_clause){
+            Analyzer.ReturnState.pollLast();
+            Analyzer.ReturnState.addLast(true);
         }
         Analyzer.LoopState.pollLast();
     }
@@ -121,7 +140,6 @@ public class StmtAnalyzer {
     /*解析返回语句*/
     private void analyseReturnStmt(){
         this.Util.expect(TokenType.RETURN_KW);
-        Analyzer.ReturnState.pollLast();
         Analyzer.ReturnState.addLast(true);
         if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){//不是void，那就必须有东西
             if(this.Util.peek().getType()==TokenType.SEMICOLON)throw new ReturnTypeError();
