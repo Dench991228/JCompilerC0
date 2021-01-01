@@ -1,15 +1,68 @@
 package jcompiler.action;
 
+import jcompiler.tokenizer.TokenType;
+import jcompiler.util.BinaryHelper;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+
 public class Instruction {
     /*指令码*/
     private int OpCode;
-    /*操作数*/
-    private int Operand;
+    /*操作数，以字节的形式储存*/
+    private List<Byte> Operand;
+    /*指令名称到指令号的映射关系*/
+    private static HashMap<String, Integer> Instructions = new HashMap<>();
     /*初始化，读取相关指令*/
     static{
+        try{
+            Scanner sc = new Scanner(new File("instruction.txt"));
+            while(sc.hasNextLine()){
+                String input_line = sc.nextLine();
+                String[] name_content = input_line.split("\\t");
+                System.out.println(name_content[0]);
+                Instructions.put(name_content[1], Integer.parseInt(name_content[0]));
+            }
+        }
+        catch(IOException e){
+            System.out.println("Instructions: Instructions load failed!");
+        }
+    }
+
+    private Instruction(){
 
     }
-    public Instruction(){
+    /*生成一个无参数的指令，不对参数与指令的关系做检查*/
+    public static Instruction getInstruction(String s){
+        Instruction ins = new Instruction();
+        ins.OpCode = Instructions.get(s);//获得指令码
+        return ins;
+    }
 
+    /*生成一个四字节参数的指令，不对参数与指令的关系做检查*/
+    public static Instruction getInstruction(String s, int param){
+        Instruction ins = new Instruction();
+        ins.OpCode = Instructions.get(s);//获得指令码
+        ins.Operand = BinaryHelper.BinaryInteger(param);
+        return ins;
+    }
+
+    /*生成一个八字节参数的指令，不对参数与指令的关系做检查*/
+    public static Instruction getInstruction(String s, long param){
+        Instruction ins = new Instruction();
+        ins.OpCode = Instructions.get(s);//获得指令码
+        ins.Operand = BinaryHelper.BinaryLong(param);
+        return ins;
+    }
+
+    public List<Byte> toByte(){
+        List<Byte> result = new LinkedList<>();
+        result.add((byte)(this.OpCode));
+        if(this.Operand!=null)result.addAll(this.Operand);
+        return result;
     }
 }

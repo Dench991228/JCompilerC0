@@ -1,6 +1,7 @@
 package jcompiler;
 
 import jcompiler.action.GlobalVariable;
+import jcompiler.action.Instruction;
 import jcompiler.analyzer.Analyzer;
 import jcompiler.analyzer.AnalyzerUtil;
 import jcompiler.analyzer.ExprAnalyzer;
@@ -16,7 +17,6 @@ import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
-        /*
         Tokenizer t = new Tokenizer(args[0]);
         AnalyzerUtil util = new AnalyzerUtil(t);
         try{
@@ -26,12 +26,6 @@ public class JCompiler {
         }
         catch(FileNotFoundException e){
             System.out.println("file not found");
-        }*/
-        GlobalVariable gb = GlobalVariable.StringGlobal("this is a test sentence");
-        System.out.println(gb);
-        System.out.println(gb.toByte());
-        System.out.println(BinaryHelper.BinaryLong(5000L));
-        System.out.println(BinaryHelper.BinaryLong(128L));
-        System.out.println(BinaryHelper.BinaryDouble(128D));
+        }
     }
 }
