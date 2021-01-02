@@ -160,7 +160,6 @@ public class Tokenizer {
         StateNode double_with_e = new StateNode(false, null);
         double_no_sci.addTransfer('e', double_with_e);
         double_no_sci.addTransfer('E', double_with_e);
-        /*TODO 可能遇到加号或者减号*/
         /*从e出来之后可能遇到一个加号或者减号*/
         StateNode double_with_e_operand = new StateNode(false, null);
         double_with_e.addTransfer('+', double_with_e_operand);
@@ -348,10 +347,43 @@ public class Tokenizer {
                     //掐头去尾
                     //转移
                     this.SavedWord = new StringBuilder();
+                    //TODO 重整字符串识别
                     name = name.substring(1, name.length()-1);
-                    name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
-                    name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
-                    result = new Token(TokenType.STRING_LITERAL, name, this.StartPos);
+                    int len = name.length();
+                    StringBuilder builder = new StringBuilder();
+                    boolean is_escaping = false;
+                    for(int i=0;i<len;i++){
+                        if(!is_escaping){
+                            if(name.charAt(i)!='\\'){
+                                builder.append(name.charAt(i));
+                            }
+                            else is_escaping = true;
+                        }
+                        else{
+                            switch(name.charAt(i)){
+                                case 'r':
+                                    builder.append('\r');
+                                    break;
+                                case 'n':
+                                    builder.append('\n');
+                                    break;
+                                case 't':
+                                    builder.append('\t');
+                                    break;
+                                case '\'':
+                                    builder.append('\'');
+                                    break;
+                                case '\"':
+                                    builder.append('\"');
+                                    break;
+                                case '\\':
+                                    builder.append('\\');
+                                    break;
+                            }
+                            is_escaping=false;
+                        }
+                    }
+                    result = new Token(TokenType.STRING_LITERAL, builder.toString(), this.StartPos);
                     break;
                 case IDENT://广义标识符
                     this.SavedWord = new StringBuilder();
