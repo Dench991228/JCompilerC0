@@ -204,6 +204,7 @@ public class ExprAnalyzer {
                     GlobalVariable gbv = GlobalVariable.StringGlobal((String)t.getValue());
                     int string_id = Analyzer.ObjFile.addGlobalVariable(gbv);
                     ins = Instruction.getInstruction("push", string_id);//获得这个字符串的id
+                    Analyzer.CurrentFunction.addInstruction(ins);
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
                     return nt;
