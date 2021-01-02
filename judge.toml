@@ -4,5 +4,5 @@ image = { source = "dockerfile", path = ".", tag = "c0-dench" }
 
 run = [
     "java jcompiler/JCompiler $input",
-    "./natrium output.o0 -o output.txt"
+    "./natrium $input -o $asm"
 ]
