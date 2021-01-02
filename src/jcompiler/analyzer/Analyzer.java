@@ -143,6 +143,7 @@ public class Analyzer {
         /*把它放到当前符号表的上级符号表中*/
         Analyzer.AnalyzerTable.getFatherTable().putIdent(function_ident, function_entry);
         int number_function = Analyzer.ObjFile.addFunction(func);
+        func.registerReturn(function_type);
         function_entry.setPosition(number_function);
         if(function_ident.getValue().toString().compareTo("main")==0){
             this.number_main = number_function;
