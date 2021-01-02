@@ -1,5 +1,7 @@
 package jcompiler.analyzer;
 
+import jcompiler.action.Function;
+import jcompiler.action.ObjectFile;
 import jcompiler.analyzer.exceptions.BranchNoReturnException;
 import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.IdentifierTypeException;
@@ -28,6 +30,13 @@ public class Analyzer {
 
     /*这个语法分析器当前分析函数的期望返回*/
     public static Token ExpectedReturnType = null;
+    /*语法分析器对应的输出文件*/
+    public static ObjectFile ObjFile = null;
+    /*语法分析器当前正在解析的函数*/
+    public static Function CurrentFunction = null;
+    /*_start函数*/
+    public static Function StartFunction = new Function();
+
     /*初始化标准库*/
     static{
         AnalyzerTable = new SymbolTable();
@@ -52,9 +61,13 @@ public class Analyzer {
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putstr", new Pos(-1,-1)), putStr);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putln", new Pos(-1,-1)), putLn);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putdouble", new Pos(-1,-1)), putDouble);
+
+        CurrentFunction = StartFunction;
     }
-    public Analyzer(AnalyzerUtil util) throws FileNotFoundException {
+    public Analyzer(AnalyzerUtil util, ObjectFile obj) throws FileNotFoundException {
         this.StmtAnalyzer = new StmtAnalyzer(util);
+        ObjFile = obj;
+        ObjFile.addFunction(StartFunction);
         this.Util = util;
     }
 

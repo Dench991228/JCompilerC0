@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.action.Instruction;
 import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
 import jcompiler.analyzer.exceptions.LoopControlException;
 import jcompiler.analyzer.exceptions.ReturnTypeError;
@@ -54,14 +55,17 @@ public class StmtAnalyzer {
                 else if(variable_type.getValue().toString().compareTo("int")==0)variable_type=Token.INTEGER;
                 if(variable_type.getValue().toString().compareTo("void")==0)throw new ErrorTokenTypeException();
                 boolean isInitialized = false;
+                SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
+                Analyzer.AnalyzerTable.putIdent(variable_ident, entry);
+                Analyzer.AnalyzerTable.moveStackTop(variable_ident);//把目标全局变量挪到顶上
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
                     isInitialized = true;
                     this.ExprAnalyzer.setExpectedType(variable_type);
                     this.ExprAnalyzer.analyseExpr(variable_type);
+                    Instruction ins = Instruction.getInstruction("store.64");
+                    Analyzer.CurrentFunction.addInstruction(ins);
                 }
                 this.Util.expect(TokenType.SEMICOLON);
-                SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
-                Analyzer.AnalyzerTable.putIdent(variable_ident, entry);
                 if(isInitialized)Analyzer.AnalyzerTable.setInitialized(variable_ident);
                 break;
             case CONST_KW:
@@ -74,10 +78,13 @@ public class StmtAnalyzer {
                 else if(variable_type.getValue().toString().compareTo("int")==0)variable_type=Token.INTEGER;
                 this.Util.expect(TokenType.ASSIGN);
                 this.ExprAnalyzer.setExpectedType(variable_type);
-                this.ExprAnalyzer.analyseExpr(variable_type);
-                this.Util.expect(TokenType.SEMICOLON);
                 SymbolEntry const_entry = SymbolEntry.getVariableEntry(variable_type, true, variable_ident.getStartPos());
                 Analyzer.AnalyzerTable.putIdent(variable_ident, const_entry);
+                Analyzer.AnalyzerTable.moveStackTop(variable_ident);
+                this.ExprAnalyzer.analyseExpr(variable_type);
+                this.Util.expect(TokenType.SEMICOLON);
+                Instruction ins = Instruction.getInstruction("store.64");
+                Analyzer.CurrentFunction.addInstruction(ins);
                 Analyzer.AnalyzerTable.setInitialized(variable_ident);
                 break;
             default:

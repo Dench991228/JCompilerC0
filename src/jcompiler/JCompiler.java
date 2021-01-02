@@ -2,6 +2,7 @@ package jcompiler;
 
 import jcompiler.action.GlobalVariable;
 import jcompiler.action.Instruction;
+import jcompiler.action.ObjectFile;
 import jcompiler.analyzer.Analyzer;
 import jcompiler.analyzer.AnalyzerUtil;
 import jcompiler.analyzer.ExprAnalyzer;
@@ -17,12 +18,14 @@ import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
-        Tokenizer t = new Tokenizer(args[0]);
+        Tokenizer t = new Tokenizer("test.txt");
         AnalyzerUtil util = new AnalyzerUtil(t);
+        ObjectFile obj = new ObjectFile();
         try{
-            Analyzer analyser = new Analyzer(util);
+            Analyzer analyser = new Analyzer(util, obj);
             analyser.analyse();
             System.out.println();
+            System.out.println(obj);
         }
         catch(FileNotFoundException e){
             System.out.println("file not found");

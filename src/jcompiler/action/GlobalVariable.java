@@ -56,7 +56,7 @@ public class GlobalVariable {
     @Override
     public String toString(){
         String s = "Is constant value:"+((byte)(this.IsConst));
-        s+=this.Value.toString();
+        s+="value:"+this.Value.toString();
         return s;
     }
 }

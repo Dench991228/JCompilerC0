@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.action.Instruction;
 import jcompiler.analyzer.exceptions.IdentifierTypeException;
 import jcompiler.analyzer.exceptions.NotDeclaredException;
 import jcompiler.analyzer.exceptions.RepeatDeclareException;
@@ -24,7 +25,7 @@ public class SymbolTable {
         this.FatherTable = father;
     }
 
-    /*根据identifier的名字，获取变量*/
+    /*根据identifier的名字，获取变量，并且把这个变量放到顶上*/
     public SymbolEntry findVariable(Token token) throws NotDeclaredException, IdentifierTypeException {
         SymbolTable cur = this;
         String token_name = (String)token.getValue();
@@ -78,5 +79,26 @@ public class SymbolTable {
     public void setInitialized(Token token){
         SymbolEntry entry = this.findVariable(token);
         entry.setInitialized(true);
+    }
+
+    /*把一个标识符对应的变量放到顶上*/
+    public void moveStackTop(Token ident){
+        SymbolEntry entry = this.findVariable(ident);
+        Instruction ins;
+        switch (entry.getVariableCategory()){
+            case 0://全局变量
+                ins = Instruction.getInstruction("globa", entry.getPosition());
+                Analyzer.CurrentFunction.addInstruction(ins);
+                ins = Instruction.getInstruction("load.64");
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
+            case 1://参数
+            case 2://局部变量
+                ins = Instruction.getInstruction("loca", entry.getPosition());
+                Analyzer.CurrentFunction.addInstruction(ins);
+                ins = Instruction.getInstruction("load64");
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
+        }
     }
 }

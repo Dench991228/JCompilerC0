@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.action.Instruction;
 import jcompiler.analyzer.exceptions.ExpressionTypeException;
 import jcompiler.analyzer.exceptions.IdentifierTypeException;
 import jcompiler.analyzer.exceptions.ReductionErrorException;
@@ -152,6 +153,7 @@ public class ExprAnalyzer {
                 case IDENT://标识符
                     nt.addTerminal(t);
                     Token token_type = Analyzer.AnalyzerTable.findVariable(t).getType();
+                    Analyzer.AnalyzerTable.moveStackTop(t);
                     nt.ResultType = token_type;
                     if(this.isTopNonTerm()){
                         //System.out.println(this.Stack.peekFirst());
@@ -182,6 +184,8 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
+                    Instruction ins = Instruction.getInstruction("push", (long)t.getValue());
+                    Analyzer.CurrentFunction.addInstruction(ins);
                     return nt;
                 case STRING_LITERAL://字符串字面量
                     //System.out.println("A literal expression or a identifier expression was reduced!");

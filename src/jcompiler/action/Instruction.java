@@ -43,6 +43,7 @@ public class Instruction {
         Instruction ins = new Instruction();
         ins.InsName = s;
         ins.OpCode = Instructions.get(s);//获得指令码
+        ins.Operand = new LinkedList<>();
         return ins;
     }
 
@@ -72,7 +73,7 @@ public class Instruction {
     }
     @Override
     public String toString(){
-        String s = this.InsName;
+        String s = (byte)(this.OpCode)+"("+this.InsName+"):";
         s+=this.Operand.toString();
         return s;
     }
