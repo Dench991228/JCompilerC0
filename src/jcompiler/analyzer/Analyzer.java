@@ -1,11 +1,9 @@
 package jcompiler.analyzer;
 
 import jcompiler.action.Function;
+import jcompiler.action.Instruction;
 import jcompiler.action.ObjectFile;
-import jcompiler.analyzer.exceptions.BranchNoReturnException;
-import jcompiler.analyzer.exceptions.ErrorTokenTypeException;
-import jcompiler.analyzer.exceptions.IdentifierTypeException;
-import jcompiler.analyzer.exceptions.StmtSyntaxException;
+import jcompiler.analyzer.exceptions.*;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 import jcompiler.util.Pos;
@@ -36,6 +34,8 @@ public class Analyzer {
     public static Function CurrentFunction = null;
     /*_start函数*/
     public static Function StartFunction = new Function();
+    /*main函数对应的编号是多少*/
+    private int number_main=0;
 
     /*初始化标准库*/
     static{
@@ -83,6 +83,9 @@ public class Analyzer {
         else throw new IdentifierTypeException();
         params.addLast(param_type);
         SymbolEntry param_entry = SymbolEntry.getVariableEntry(param_type, false, param_ident.getStartPos());
+        /*在当前的函数上登记这个参数*/
+        param_entry.setVariableCategory(1);
+        param_entry.setPosition(Analyzer.CurrentFunction.registerParam(param_type));
         /*把这个参数加入到符号表中，并且设置为已经初始化*/
         AnalyzerTable.putIdent(param_ident, param_entry);
         AnalyzerTable.setInitialized(param_ident);
@@ -97,7 +100,9 @@ public class Analyzer {
         Token function_ident = this.Util.next(TokenType.IDENT);
         LinkedList<Token> params = new LinkedList<>();//函数的参数列表，里面全部是type
         this.Util.expect(TokenType.L_PAREN);
-        Analyzer.addSymbolTable();
+        Analyzer.addSymbolTable();//用来记录参数的符号表
+        Function func = new Function();//当前正在解析的函数
+        Analyzer.CurrentFunction = func;
         /*解析参数列表，如果有参数的话*/
         /*参数列表里面的形参和函数内部的东西在一个作用域里面*/
         while(this.Util.peek().getType()!=TokenType.R_PAREN){
@@ -117,10 +122,16 @@ public class Analyzer {
         SymbolEntry function_entry = SymbolEntry.getFunctionEntry(function_type, params, function_ident.getStartPos());
         /*把它放到当前符号表的上级符号表中*/
         Analyzer.AnalyzerTable.getFatherTable().putIdent(function_ident, function_entry);
+        int number_function = Analyzer.ObjFile.addFunction(func);
+        function_entry.setPosition(number_function);
+        if(function_ident.getValue().toString().compareTo("main")==0){
+            this.number_main = number_function;
+        }
         this.StmtAnalyzer.analyseBlockStmt();
         /*如果函数内部没有返回，看一眼是不是void*/
         if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
         Analyzer.withdraw();
+        Analyzer.CurrentFunction = StartFunction;
     }
 
     /*顶层的分析*/
@@ -139,6 +150,13 @@ public class Analyzer {
                     throw new StmtSyntaxException();
             }
         }
+        /*给_start函数加上调用main的过程*/
+        Instruction ins;
+        if(number_main==0)throw new NoMainException();
+        ins = Instruction.getInstruction("stackalloc", 1);
+        Analyzer.CurrentFunction.addInstruction(ins);
+        ins = Instruction.getInstruction("call", number_main);
+        Analyzer.CurrentFunction.addInstruction(ins);
     }
 
     /*分析进入一层嵌套的时候调用这个函数，如果是while，就入栈一个true，否则根栈顶元素一样，break/continue的时候，看栈顶元素是不是true*/

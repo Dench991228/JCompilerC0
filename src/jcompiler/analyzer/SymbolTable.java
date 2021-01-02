@@ -93,10 +93,15 @@ public class SymbolTable {
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
             case 1://参数
+                ins = Instruction.getInstruction("arga", entry.getPosition());
+                Analyzer.CurrentFunction.addInstruction(ins);
+                ins = Instruction.getInstruction("load.64");
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
             case 2://局部变量
                 ins = Instruction.getInstruction("loca", entry.getPosition());
                 Analyzer.CurrentFunction.addInstruction(ins);
-                ins = Instruction.getInstruction("load64");
+                ins = Instruction.getInstruction("load.64");
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
         }
@@ -111,6 +116,10 @@ public class SymbolTable {
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
             case 1://参数
+                ins = Instruction.getInstruction("arga", entry.getPosition());
+                System.out.println("visited argument");
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
             case 2://局部变量
                 ins = Instruction.getInstruction("loca", entry.getPosition());
                 Analyzer.CurrentFunction.addInstruction(ins);

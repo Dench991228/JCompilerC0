@@ -75,7 +75,10 @@ public class Function {
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder();
-        s.append("Function Number:").append(BinaryHelper.BinaryInteger(this.ID)).append('\n');
+        s.append("Function Name:").append(BinaryHelper.BinaryInteger(this.ID)).append('\n');
+        s.append("Return Slot:").append(BinaryHelper.BinaryInteger(this.ReturnSlot)).append("\n");
+        s.append("Parameter Slot:").append(BinaryHelper.BinaryInteger(this.ParamSlot)).append("\n");
+        s.append("Local Slot:").append(BinaryHelper.BinaryInteger(this.LocSlot)).append("\n");
         s.append("Instructions:\n");
         for(Instruction ins:Instructions){
             s.append(ins.toString()).append("\n");
