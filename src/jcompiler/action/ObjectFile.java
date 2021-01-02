@@ -63,8 +63,8 @@ public class ObjectFile {
         }
         return result;
     }
-    public void writeToFile() throws IOException {
-        File output_file = new File("natrium");
+    public void writeToFile(String target) throws IOException {
+        File output_file = new File(target);
         OutputStream output_stream = new FileOutputStream(output_file);
         /*魔数写出去*/
         output_stream.write(modifyArray(BinaryHelper.BinaryInteger(this.magic)));

@@ -26,7 +26,7 @@ public class JCompiler {
             analyser.analyse();
             System.out.println();
             System.out.println(obj);
-            obj.writeToFile();
+            obj.writeToFile(args[1]);
         }
         catch (IOException e) {
             e.printStackTrace();
