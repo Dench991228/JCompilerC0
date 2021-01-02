@@ -18,7 +18,7 @@ import java.util.Scanner;
 
 public class JCompiler {
     public static void main(String[] args){
-        Tokenizer t = new Tokenizer("test.txt");
+        Tokenizer t = new Tokenizer(args[0]);
         AnalyzerUtil util = new AnalyzerUtil(t);
         ObjectFile obj = new ObjectFile();
         try{
@@ -26,9 +26,10 @@ public class JCompiler {
             analyser.analyse();
             System.out.println();
             System.out.println(obj);
+            obj.writeToFile();
         }
-        catch(FileNotFoundException e){
-            System.out.println("file not found");
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

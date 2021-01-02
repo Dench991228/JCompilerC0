@@ -2,6 +2,7 @@ package jcompiler.action;
 
 import jcompiler.util.BinaryHelper;
 
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,7 +54,33 @@ public class ObjectFile {
         }
         return s.toString();
     }
-    public void writeToFile(){
-
+    private byte[] modifyArray(List<Byte> source){
+        byte[] result = new byte[source.size()];
+        int i = 0;
+        for(byte b:source){
+            result[i] = b;
+            i++;
+        }
+        return result;
+    }
+    public void writeToFile() throws IOException {
+        File output_file = new File("output.o0");
+        OutputStream output_stream = new FileOutputStream(output_file);
+        /*魔数写出去*/
+        output_stream.write(modifyArray(BinaryHelper.BinaryInteger(this.magic)));
+        /*版本号*/
+        output_stream.write(modifyArray(BinaryHelper.BinaryInteger(this.version)));
+        /*一共有多少个全局变量*/
+        output_stream.write(modifyArray(BinaryHelper.BinaryInteger(this.GlobalVariables.size())));
+        /*全局变量的数组*/
+        for(GlobalVariable gb:GlobalVariables){
+            output_stream.write(modifyArray(gb.toByte()));
+        }
+        /*一共有多少函数*/
+        output_stream.write(modifyArray(BinaryHelper.BinaryInteger(this.Functions.size())));
+        for(Function func:Functions){
+            output_stream.write(modifyArray(func.toByte()));
+        }
+        output_stream.close();
     }
 }
