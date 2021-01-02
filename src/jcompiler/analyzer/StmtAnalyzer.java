@@ -57,8 +57,8 @@ public class StmtAnalyzer {
                 boolean isInitialized = false;
                 SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
                 Analyzer.AnalyzerTable.putIdent(variable_ident, entry);
-                Analyzer.AnalyzerTable.moveAddressStackTop(variable_ident);//把目标全局变量挪到顶上
-                if(this.Util.nextIf(TokenType.ASSIGN)!=null){
+                if(this.Util.nextIf(TokenType.ASSIGN)!=null){//需要考虑赋值
+                    Analyzer.AnalyzerTable.moveAddressStackTop(variable_ident);//把目标全局变量挪到顶上
                     isInitialized = true;
                     this.ExprAnalyzer.setExpectedType(variable_type);
                     this.ExprAnalyzer.analyseExpr(variable_type);

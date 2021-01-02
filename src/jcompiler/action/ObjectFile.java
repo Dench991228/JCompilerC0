@@ -53,4 +53,7 @@ public class ObjectFile {
         }
         return s.toString();
     }
+    public void writeToFile(){
+
+    }
 }

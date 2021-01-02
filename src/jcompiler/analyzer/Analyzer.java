@@ -9,6 +9,8 @@ import jcompiler.tokenizer.TokenType;
 import jcompiler.util.Pos;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Analyzer {
@@ -36,22 +38,34 @@ public class Analyzer {
     public static Function StartFunction = new Function();
     /*main函数对应的编号是多少*/
     private int number_main=0;
+    /*标准库：函数名称-指令*/
+    public static final HashMap<String, Instruction> StandardLibrary = new HashMap<>();
+    /*函数名称集合*/
+    public static final HashSet<String> FunctionNames = new HashSet<>();
 
     /*初始化标准库*/
     static{
         AnalyzerTable = new SymbolTable();
         SymbolEntry getInt = SymbolEntry.getFunctionEntry(Token.INTEGER, new LinkedList<Token>(), new Pos(-1,-1));
+        StandardLibrary.put("getint", Instruction.getInstruction("scan.i"));
         SymbolEntry getDouble = SymbolEntry.getFunctionEntry(Token.DOUBLE, new LinkedList<Token>(), new Pos(-1,-1));
+        StandardLibrary.put("getdouble", Instruction.getInstruction("scan.f"));
         SymbolEntry getChar = SymbolEntry.getFunctionEntry(Token.INTEGER, new LinkedList<Token>(), new Pos(-1,-1));
+        StandardLibrary.put("getchar", Instruction.getInstruction("scan.c"));
         LinkedList<Token> param_putInt = new LinkedList<>();
         param_putInt.addLast(Token.INTEGER);
         SymbolEntry putInt = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        StandardLibrary.put("putint", Instruction.getInstruction("print.i"));
         SymbolEntry putChar = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        StandardLibrary.put("putchar", Instruction.getInstruction("print.c"));
         SymbolEntry putStr = SymbolEntry.getFunctionEntry(Token.VOID, param_putInt, new Pos(-1,-1));
+        StandardLibrary.put("putstr", Instruction.getInstruction("print.s"));
         SymbolEntry putLn = SymbolEntry.getFunctionEntry(Token.VOID, new LinkedList<>(), new Pos(-1,-1));
+        StandardLibrary.put("putln", Instruction.getInstruction("println"));
         LinkedList<Token> param_single_double = new LinkedList<>();
         param_single_double.addLast(Token.DOUBLE);
         SymbolEntry putDouble = SymbolEntry.getFunctionEntry(Token.DOUBLE, param_single_double, new Pos(-1,-1));
+        StandardLibrary.put("putdouble", Instruction.getInstruction("print.f"));
 
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getint", new Pos(-1,-1)), getInt);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "getdouble", new Pos(-1,-1)), getDouble);
@@ -64,6 +78,7 @@ public class Analyzer {
 
         CurrentFunction = StartFunction;
     }
+
     public Analyzer(AnalyzerUtil util, ObjectFile obj) throws FileNotFoundException {
         this.StmtAnalyzer = new StmtAnalyzer(util);
         ObjFile = obj;
@@ -98,6 +113,7 @@ public class Analyzer {
         this.Util.expect(TokenType.FN_KW);
         /*函数的标识符*/
         Token function_ident = this.Util.next(TokenType.IDENT);
+        FunctionNames.add(function_ident.getValue().toString());
         LinkedList<Token> params = new LinkedList<>();//函数的参数列表，里面全部是type
         this.Util.expect(TokenType.L_PAREN);
         Analyzer.addSymbolTable();//用来记录参数的符号表
@@ -131,6 +147,7 @@ public class Analyzer {
         /*如果函数内部没有返回，看一眼是不是void*/
         if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
         Analyzer.withdraw();
+        Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("ret"));
         Analyzer.CurrentFunction = StartFunction;
     }
 

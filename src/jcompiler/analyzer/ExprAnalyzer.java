@@ -209,11 +209,10 @@ public class ExprAnalyzer {
                     return nt;
                 case R_PAREN://函数调用或者括号表达式
                     /*把右括号加进去*/
-                    //TODO 括号表达式不用管括号，但是过程调用是个大问题
                     nt.addTerminal(t);
                     //右括号出去之后，前面应该要么param_list要么expr，因为不是等号，所以肯定没有左值表达式
                     //如果左边是左括号，那么必定是没有参数的函数调用
-                    if(this.isTopTokenType(TokenType.L_PAREN)){
+                    if(this.isTopTokenType(TokenType.L_PAREN)){//函数调用，无参数
                         t = (Token)this.Stack.pollFirst();
                         nt.addTerminal(t);
                         if(!this.isTopTokenType(TokenType.IDENT)){
@@ -222,6 +221,13 @@ public class ExprAnalyzer {
                         else{
                             t = (Token)this.Stack.pollFirst();//函数标识符
                             SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(t);
+                            if(Analyzer.StandardLibrary.containsKey(t.getValue().toString())){//是一个标准库函数
+                                Analyzer.CurrentFunction.addInstruction(Analyzer.StandardLibrary.get(t.getValue().toString()));
+                                Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("store.64"));
+                            }
+                            else{
+                                Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("call", function_entry.getPosition()));
+                            }
                             nt.ResultType = function_entry.getType();
                             nt.addTerminal(t);
                             if(this.isTopNonTerm())throw new ReductionErrorException();
@@ -241,9 +247,15 @@ public class ExprAnalyzer {
                     nt.addTerminal((Token) this.Stack.pollFirst());//左括号
                     /*瞅一眼前面有没有ident，如果有，就放进去*/
                     //顺便决定一波nt的类型
-                    if(this.isTopToken()&&this.isTopTokenType(TokenType.IDENT)){
+                    if(this.isTopToken()&&this.isTopTokenType(TokenType.IDENT)){//是一个函数调用
                         //System.out.println("A procedure call expression was reduced!");
-                        Token function_ident = (Token)this.Stack.pollFirst();
+                        Token function_ident = (Token)this.Stack.pollFirst();//函数标识符
+                        if(Analyzer.StandardLibrary.containsKey(function_ident.getValue().toString())){//标准库调用
+                            Analyzer.CurrentFunction.addInstruction(Analyzer.StandardLibrary.get(function_ident.getValue().toString()));
+                        }
+                        else{
+                            Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("call", Analyzer.AnalyzerTable.findFunction(function_ident).getPosition()));
+                        }
                         nt.ResultType = Analyzer.AnalyzerTable.findFunction(function_ident).getType();
                         nt.addTerminal(function_ident);
                     }
@@ -396,6 +408,7 @@ public class ExprAnalyzer {
         nt.addTerminal(top_token);
         this.Stack.addFirst(nt);
         System.out.println(nt.toString()+" was reduced");
+        Analyzer.AnalyzerTable.moveAddressStackTop(top_token);
         return nt;
     }
 
@@ -452,6 +465,18 @@ public class ExprAnalyzer {
                 next.setType(TokenType.NEG);
             }
             this.putToken(next);
+            if(Analyzer.FunctionNames.contains(next.getValue().toString())){//一个非库函数
+                SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(next);
+                Token type = function_entry.getType();
+                Instruction ins;
+                if(type!=Token.VOID){
+                    ins = Instruction.getInstruction("stackalloc", 1);
+                }
+                else{
+                    ins = Instruction.getInstruction("stackalloc", 0);
+                }
+                Analyzer.CurrentFunction.addInstruction(ins);
+            }
         }
         this.putToken(new Token(TokenType.SHARP, 0, new Pos(-1,-1)));
     }
