@@ -6,3 +6,4 @@ COPY operands.txt ./
 COPY binary_operands.txt ./
 COPY operand_priority.md ./
 COPY reserved.txt ./
+COPY instruction.txt ./
