@@ -203,7 +203,7 @@ public class ExprAnalyzer {
                     }
                     GlobalVariable gbv = GlobalVariable.StringGlobal((String)t.getValue());
                     int string_id = Analyzer.ObjFile.addGlobalVariable(gbv);
-                    ins = Instruction.getInstruction("push", string_id);//获得这个字符串的id
+                    ins = Instruction.getInstruction("push", (long)string_id);//获得这个字符串的id
                     Analyzer.CurrentFunction.addInstruction(ins);
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
@@ -224,7 +224,6 @@ public class ExprAnalyzer {
                             SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(t);
                             if(Analyzer.StandardLibrary.containsKey(t.getValue().toString())){//是一个标准库函数
                                 Analyzer.CurrentFunction.addInstruction(Analyzer.StandardLibrary.get(t.getValue().toString()));
-                                Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("store.64"));
                             }
                             else{
                                 Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("call", function_entry.getPosition()));
