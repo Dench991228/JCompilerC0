@@ -99,7 +99,7 @@ public class Analyzer {
         else if(param_type.getValue().toString().compareTo("double")==0)param_type = Token.DOUBLE;
         else throw new IdentifierTypeException();
         params.addLast(param_type);
-        SymbolEntry param_entry = SymbolEntry.getVariableEntry(param_type, false, param_ident.getStartPos());
+        SymbolEntry param_entry = SymbolEntry.getParameterEntry(param_type, false, param_ident.getStartPos());
         /*在当前的函数上登记这个参数*/
         param_entry.setVariableCategory(1);
         param_entry.setPosition(Analyzer.CurrentFunction.registerParam(param_type));

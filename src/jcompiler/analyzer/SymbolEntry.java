@@ -63,6 +63,18 @@ public class SymbolEntry {
         return entry;
     }
 
+    /*获得一个变量的表项，并且想办法把它登记到相应的函数/全局变量中*/
+    public static SymbolEntry getParameterEntry(Token variable_type,boolean is_constant, Pos decl_pos){
+        SymbolEntry entry = new SymbolEntry();
+        entry.IsConst = is_constant;
+        entry.Type = variable_type;
+        entry.IsVar = true;
+        entry.IsInitialized = false;
+        entry.DeclPos = decl_pos;
+        entry.VariableCategory = 1;
+        return entry;
+    }
+
     /*获取一个函数的表项*/
     public static SymbolEntry getFunctionEntry(Token return_type, LinkedList<Token> param_types, Pos decl_pos){
         SymbolEntry entry = new SymbolEntry();
