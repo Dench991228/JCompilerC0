@@ -26,7 +26,6 @@ public class Instruction {
             while(sc.hasNextLine()){
                 String input_line = sc.nextLine();
                 String[] name_content = input_line.split("\\t");
-                System.out.println(name_content[0]);
                 Instructions.put(name_content[1], Integer.parseInt(name_content[0]));
             }
         }
@@ -61,6 +60,21 @@ public class Instruction {
         Instruction ins = new Instruction();
         ins.OpCode = Instructions.get(s);//获得指令码
         ins.Operand = BinaryHelper.BinaryLong(param);
+        ins.InsName = s;
+        return ins;
+    }
+
+    /*生成一个八字节参数的指令，不对参数与指令的关系做检查*/
+    public static Instruction getInstruction(String s, double param){
+        long l = Double.doubleToRawLongBits(param);
+        Instruction ins = new Instruction();
+        ins.OpCode = Instructions.get(s);//获得指令码
+        ins.Operand=new LinkedList<>();
+        int i=7;
+        while(i>=0){
+            ins.Operand.add((byte)((l>>(i*8))&0xff));
+            i--;
+        }
         ins.InsName = s;
         return ins;
     }

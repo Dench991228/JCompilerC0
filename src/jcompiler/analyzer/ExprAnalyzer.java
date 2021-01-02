@@ -146,6 +146,7 @@ public class ExprAnalyzer {
     /*尝试在栈顶规约出expr*/
     private NonTerminal reduceExpr()throws ReductionErrorException {
         NonTerminal nt = new NonTerminal(NonTerminalType.EXPR);
+        Instruction ins;
         /*栈顶是终结符*/
         if(this.isTopToken()){
             Token t = (Token)this.Stack.pollFirst();
@@ -172,6 +173,9 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
+                    System.out.println((double)t.getValue());
+                    ins = Instruction.getInstruction("push", (double)t.getValue());
+                    Analyzer.CurrentFunction.addInstruction(ins);
                     return nt;
                 case UINT_LITERAL://整数字面量
                 case CHAR_LITERAL:
@@ -184,7 +188,7 @@ public class ExprAnalyzer {
                     }
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
-                    Instruction ins = Instruction.getInstruction("push", (long)t.getValue());
+                    ins = Instruction.getInstruction("push", (long)t.getValue());
                     Analyzer.CurrentFunction.addInstruction(ins);
                     return nt;
                 case STRING_LITERAL://字符串字面量
