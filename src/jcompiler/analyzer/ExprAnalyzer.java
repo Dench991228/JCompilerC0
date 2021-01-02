@@ -469,12 +469,7 @@ public class ExprAnalyzer {
                 SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(next);
                 Token type = function_entry.getType();
                 Instruction ins;
-                if(type!=Token.VOID){
-                    ins = Instruction.getInstruction("stackalloc", 1);
-                }
-                else{
-                    ins = Instruction.getInstruction("stackalloc", 0);
-                }
+                ins = Instruction.getInstruction("stackalloc", 1);
                 Analyzer.CurrentFunction.addInstruction(ins);
             }
         }
