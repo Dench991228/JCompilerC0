@@ -81,8 +81,8 @@ public class SymbolTable {
         entry.setInitialized(true);
     }
 
-    /*把一个标识符对应的变量放到顶上*/
-    public void moveStackTop(Token ident){
+    /*把一个标识符对应的值放到顶上*/
+    public void moveValueStackTop(Token ident){
         SymbolEntry entry = this.findVariable(ident);
         Instruction ins;
         switch (entry.getVariableCategory()){
@@ -97,6 +97,22 @@ public class SymbolTable {
                 ins = Instruction.getInstruction("loca", entry.getPosition());
                 Analyzer.CurrentFunction.addInstruction(ins);
                 ins = Instruction.getInstruction("load64");
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
+        }
+    }
+    /*把一个标识符对应的地址放到顶上*/
+    public void moveAddressStackTop(Token ident){
+        SymbolEntry entry = this.findVariable(ident);
+        Instruction ins;
+        switch (entry.getVariableCategory()){
+            case 0://全局变量
+                ins = Instruction.getInstruction("globa", entry.getPosition());
+                Analyzer.CurrentFunction.addInstruction(ins);
+                break;
+            case 1://参数
+            case 2://局部变量
+                ins = Instruction.getInstruction("loca", entry.getPosition());
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
         }

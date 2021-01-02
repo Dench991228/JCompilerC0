@@ -1,5 +1,6 @@
 package jcompiler.analyzer;
 
+import jcompiler.action.GlobalVariable;
 import jcompiler.action.Instruction;
 import jcompiler.analyzer.exceptions.ExpressionTypeException;
 import jcompiler.analyzer.exceptions.IdentifierTypeException;
@@ -154,7 +155,7 @@ public class ExprAnalyzer {
                 case IDENT://标识符
                     nt.addTerminal(t);
                     Token token_type = Analyzer.AnalyzerTable.findVariable(t).getType();
-                    Analyzer.AnalyzerTable.moveStackTop(t);
+                    Analyzer.AnalyzerTable.moveValueStackTop(t);
                     nt.ResultType = token_type;
                     if(this.isTopNonTerm()){
                         //System.out.println(this.Stack.peekFirst());
@@ -200,11 +201,15 @@ public class ExprAnalyzer {
                         //System.out.println(this.Stack.peekFirst());
                         throw new ReductionErrorException();
                     }
+                    GlobalVariable gbv = GlobalVariable.StringGlobal((String)t.getValue());
+                    int string_id = Analyzer.ObjFile.addGlobalVariable(gbv);
+                    ins = Instruction.getInstruction("push", string_id);//获得这个字符串的id
                     this.Stack.addFirst(nt);
                     System.out.println(nt.toString()+" was reduced");
                     return nt;
                 case R_PAREN://函数调用或者括号表达式
                     /*把右括号加进去*/
+                    //TODO 括号表达式不用管括号，但是过程调用是个大问题
                     nt.addTerminal(t);
                     //右括号出去之后，前面应该要么param_list要么expr，因为不是等号，所以肯定没有左值表达式
                     //如果左边是左括号，那么必定是没有参数的函数调用
@@ -255,9 +260,13 @@ public class ExprAnalyzer {
                     if(((String)t.getValue()).compareTo("void")==0)throw new ReductionErrorException();
                     if(t.getValue().toString().compareTo("double")==0){
                         nt.ResultType = Token.DOUBLE;
+                        ins = Instruction.getInstruction("itof");
+                        Analyzer.CurrentFunction.addInstruction(ins);
                     }
                     else if(t.getValue().toString().compareTo("int")==0){
                         nt.ResultType = Token.INTEGER;
+                        ins = Instruction.getInstruction("ftoi");
+                        Analyzer.CurrentFunction.addInstruction(ins);
                     }
                     /*判断接下来是不是as关键字*/
                     if(!(this.Stack.peekFirst() instanceof Token)||(((Token) this.Stack.peekFirst()).getType())!=TokenType.AS_KW){
@@ -289,6 +298,8 @@ public class ExprAnalyzer {
                 nt.ResultType = former.ResultType;
                 //System.out.println("A negative expression was reduced!");
                 read.addLast(this.Stack.pollFirst());
+                ins = Instruction.getInstruction(former.ResultType==Token.INTEGER?"neg.i":"neg.f");//取反表达式的指令
+                Analyzer.CurrentFunction.addInstruction(ins);
             }
             else if(!this.isTopToken()&&this.getTopTerminal().getType()==TokenType.ASSIGN){//赋值表达式
                 NonTerminal right_expr = (NonTerminal) this.Stack.pollFirst();
@@ -300,17 +311,45 @@ public class ExprAnalyzer {
                 read.addLast(left_expr);
                 if(left_expr.ResultType!=right_expr.ResultType)throw new ExpressionTypeException();
                 nt.ResultType = Token.VOID;
+                ins = Instruction.getInstruction("store.64");//规约左值表达式的时候已经把地址放到这个表达式上面了
             }
             else if(!this.isTopToken()&&BinaryOperands.contains(this.getTopTerminal().getType())){//运算符表达式
                 NonTerminal right_expr = (NonTerminal) this.Stack.pollFirst();
                 read.addLast(right_expr);
                 //System.out.println("A binary operand expression was reduced!");
-                read.addLast(this.Stack.pollFirst());
+                Token operator = (Token)this.Stack.pollFirst();//这个是运算符
+                read.addLast(operator);
                 if(!this.isTopNonTerm()||!this.isTopNonTermType(NonTerminalType.EXPR))throw new ReductionErrorException();
                 NonTerminal left_expr = (NonTerminal) this.Stack.pollFirst();
                 read.addLast(left_expr);
                 if(left_expr.ResultType!=right_expr.ResultType)throw new ExpressionTypeException();
                 nt.ResultType = left_expr.ResultType;
+                boolean isInteger = nt.ResultType==Token.INTEGER;
+                switch(operator.getType()){
+                    case PLUS:
+                        ins = Instruction.getInstruction(isInteger?"add.i":"add.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
+                    case MINUS:
+                        ins = Instruction.getInstruction(isInteger?"sub.i":"sub.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
+                    case MUL:
+                        ins = Instruction.getInstruction(isInteger?"mul.i":"mul.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
+                    case DIV:
+                        ins = Instruction.getInstruction(isInteger?"div.i":"div.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
+                        // TODO 比较型的先不管
+                    case EQ:
+                    case NEQ:
+                    case GT:
+                    case GE:
+                    case LT:
+                    case LE:
+                }
             }
             else{//有问题
                 throw new ReductionErrorException();

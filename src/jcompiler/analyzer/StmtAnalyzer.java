@@ -57,7 +57,7 @@ public class StmtAnalyzer {
                 boolean isInitialized = false;
                 SymbolEntry entry = SymbolEntry.getVariableEntry(variable_type, false, variable_ident.getStartPos());
                 Analyzer.AnalyzerTable.putIdent(variable_ident, entry);
-                Analyzer.AnalyzerTable.moveStackTop(variable_ident);//把目标全局变量挪到顶上
+                Analyzer.AnalyzerTable.moveAddressStackTop(variable_ident);//把目标全局变量挪到顶上
                 if(this.Util.nextIf(TokenType.ASSIGN)!=null){
                     isInitialized = true;
                     this.ExprAnalyzer.setExpectedType(variable_type);
@@ -80,7 +80,7 @@ public class StmtAnalyzer {
                 this.ExprAnalyzer.setExpectedType(variable_type);
                 SymbolEntry const_entry = SymbolEntry.getVariableEntry(variable_type, true, variable_ident.getStartPos());
                 Analyzer.AnalyzerTable.putIdent(variable_ident, const_entry);
-                Analyzer.AnalyzerTable.moveStackTop(variable_ident);
+                Analyzer.AnalyzerTable.moveAddressStackTop(variable_ident);
                 this.ExprAnalyzer.analyseExpr(variable_type);
                 this.Util.expect(TokenType.SEMICOLON);
                 Instruction ins = Instruction.getInstruction("store.64");
