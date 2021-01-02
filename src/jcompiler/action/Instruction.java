@@ -13,6 +13,8 @@ import java.util.Scanner;
 public class Instruction {
     /*指令码*/
     private int OpCode;
+    /*指令名称，没什么卵用，就是用来debug*/
+    private String InsName;
     /*操作数，以字节的形式储存*/
     private List<Byte> Operand;
     /*指令名称到指令号的映射关系*/
@@ -39,6 +41,7 @@ public class Instruction {
     /*生成一个无参数的指令，不对参数与指令的关系做检查*/
     public static Instruction getInstruction(String s){
         Instruction ins = new Instruction();
+        ins.InsName = s;
         ins.OpCode = Instructions.get(s);//获得指令码
         return ins;
     }
@@ -48,6 +51,7 @@ public class Instruction {
         Instruction ins = new Instruction();
         ins.OpCode = Instructions.get(s);//获得指令码
         ins.Operand = BinaryHelper.BinaryInteger(param);
+        ins.InsName = s;
         return ins;
     }
 
@@ -56,6 +60,7 @@ public class Instruction {
         Instruction ins = new Instruction();
         ins.OpCode = Instructions.get(s);//获得指令码
         ins.Operand = BinaryHelper.BinaryLong(param);
+        ins.InsName = s;
         return ins;
     }
 
@@ -64,5 +69,11 @@ public class Instruction {
         result.add((byte)(this.OpCode));
         if(this.Operand!=null)result.addAll(this.Operand);
         return result;
+    }
+    @Override
+    public String toString(){
+        String s = this.InsName;
+        s+=this.Operand.toString();
+        return s;
     }
 }

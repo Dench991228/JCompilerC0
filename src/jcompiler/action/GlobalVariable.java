@@ -48,7 +48,7 @@ public class GlobalVariable {
         int length_array = this.Value.size();
         LinkedList<Byte> bytes = new LinkedList<>();
         bytes.add((byte)this.IsConst);
-        bytes.add((byte)length_array);
+        bytes.addAll(BinaryHelper.BinaryInteger(length_array));
         bytes.addAll(this.Value);
         return bytes;
     }
