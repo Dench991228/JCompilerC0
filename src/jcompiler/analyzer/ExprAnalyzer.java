@@ -324,6 +324,7 @@ public class ExprAnalyzer {
                 if(left_expr.ResultType!=right_expr.ResultType)throw new ExpressionTypeException();
                 nt.ResultType = Token.VOID;
                 ins = Instruction.getInstruction("store.64");//规约左值表达式的时候已经把地址放到这个表达式上面了
+                Analyzer.CurrentFunction.addInstruction(ins);
             }
             else if(!this.isTopToken()&&BinaryOperands.contains(this.getTopTerminal().getType())){//运算符表达式
                 NonTerminal right_expr = (NonTerminal) this.Stack.pollFirst();
