@@ -1,6 +1,7 @@
 package jcompiler.analyzer;
 
 import jcompiler.action.Function;
+import jcompiler.action.GlobalVariable;
 import jcompiler.action.Instruction;
 import jcompiler.action.ObjectFile;
 import jcompiler.analyzer.exceptions.*;
@@ -75,7 +76,6 @@ public class Analyzer {
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putstr", new Pos(-1,-1)), putStr);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putln", new Pos(-1,-1)), putLn);
         AnalyzerTable.putIdent(new Token(TokenType.IDENT, "putdouble", new Pos(-1,-1)), putDouble);
-
         CurrentFunction = StartFunction;
     }
 
@@ -84,6 +84,8 @@ public class Analyzer {
         ObjFile = obj;
         ObjFile.addFunction(StartFunction);
         this.Util = util;
+        GlobalVariable gbv = GlobalVariable.StringGlobal("_start");
+        ObjFile.addGlobalVariable(gbv);
     }
 
     /*解析一个函数的参数*/
@@ -113,6 +115,8 @@ public class Analyzer {
         this.Util.expect(TokenType.FN_KW);
         /*函数的标识符*/
         Token function_ident = this.Util.next(TokenType.IDENT);
+        GlobalVariable gbv = GlobalVariable.StringGlobal(function_ident.getValue().toString());
+        ObjFile.addGlobalVariable(gbv);
         FunctionNames.add(function_ident.getValue().toString());
         LinkedList<Token> params = new LinkedList<>();//函数的参数列表，里面全部是type
         this.Util.expect(TokenType.L_PAREN);
