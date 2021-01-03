@@ -10,6 +10,7 @@ import jcompiler.tokenizer.TokenType;
 import jcompiler.util.BinaryHelper;
 
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 
 /*
 * 语法分析器，使用OPG完成expr的分析，先完成expr部分
@@ -101,16 +102,25 @@ public class StmtAnalyzer {
         boolean has_else_clause = false;//有没有else语句
         Analyzer.ReturnState.addLast(false);
         Analyzer.putLoopState(false);
-        this.Util.expect(TokenType.IF_KW);
+        LinkedList<Instruction> block_end_instruction = new LinkedList<>();//用来保存块最后的跳转
+        Instruction former_judge;//用来保存上一个语句的条件跳转
+        this.Util.expect(TokenType.IF_KW);//第一个if语句
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
+        //获取这里的语句，保存下来，如果有问题就到下一个字句
+        former_judge = Analyzer.CurrentFunction.getLastInstruction();
         this.FirstIf=true;
         this.analyseBlockStmt();
+        //if块里面的东西没了，记得下来，最后统一跳转到最后的话
+        Instruction end_block = Instruction.getInstruction("br");
+        Analyzer.CurrentFunction.addInstruction(end_block);
+        block_end_instruction.add(end_block);
         this.FirstIf=false;
         boolean last_state = Analyzer.ReturnState.pollLast();
         if(!last_state)has_branch_no_return = true;
-        while(this.Util.peek().getType()==TokenType.ELSE_KW){
+        while(this.Util.peek().getType()==TokenType.ELSE_KW){//各种各样的else-if和else
             this.Util.next();
-            if(this.Util.peek().getType()==TokenType.L_BRACE){//左大括号，不会有elif了
+            if(this.Util.peek().getType()==TokenType.L_BRACE){//左大括号else 字句，不会有elif了
+                former_judge.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(former_judge)-1));//上一句不对，就到这
                 Analyzer.ReturnState.addLast(false);
                 this.analyseBlockStmt();
                 last_state = Analyzer.ReturnState.pollLast();
@@ -120,12 +130,26 @@ public class StmtAnalyzer {
             }
             else{
                 this.Util.expect(TokenType.IF_KW);
+                former_judge.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(former_judge)-1));
                 this.ExprAnalyzer.analyseExpr(Token.INTEGER);
+                former_judge = Analyzer.CurrentFunction.getLastInstruction();//更新former_judge
                 Analyzer.ReturnState.addLast(false);
                 this.analyseBlockStmt();
+                end_block = Instruction.getInstruction("br");
+                block_end_instruction.add(end_block);
+                Analyzer.CurrentFunction.addInstruction(end_block);
                 last_state = Analyzer.ReturnState.pollLast();
                 if(!last_state)has_branch_no_return = true;
             }
+            Instruction end_if = Instruction.getInstruction("nop");
+            Analyzer.CurrentFunction.addInstruction(end_if);
+        }
+        //最后的语句，在加入到函数之前，先设置好前面的块结束，无条件跳转
+        for(Instruction ins:block_end_instruction){
+            ins.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(ins)));
+        }
+        if(!has_else_clause){//没有else语句，把最后一个子句的跳转拿过来设置一下
+            end_block.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(end_block)));
         }
         if(!has_branch_no_return&&has_else_clause){
             Analyzer.ReturnState.pollLast();
@@ -153,7 +177,6 @@ public class StmtAnalyzer {
         Instruction unconditional_jump = Instruction.getInstruction("br", -Analyzer.CurrentFunction.getOffset(nop_fore));
         Analyzer.CurrentFunction.addInstruction(unconditional_jump);
 
-        //TODO 把前面的conditional_jump的操作数补齐，跳转到下面的语句
         int offset = Analyzer.CurrentFunction.getOffset(conditional_jump);
         conditional_jump.setOperand(BinaryHelper.BinaryInteger(offset-1));//正着跳，需要减一
         //无条件跳转完了，接下来是跳过while的语句，如果前面的条件跳转GG了，就跳转到这里，这里也有一个nop
@@ -180,6 +203,7 @@ public class StmtAnalyzer {
             Analyzer.CurrentFunction.addInstruction(ins);
         }
         this.Util.expect(TokenType.SEMICOLON);
+        Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("ret"));
     }
 
     /*解析break语句*/

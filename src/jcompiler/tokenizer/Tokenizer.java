@@ -331,7 +331,7 @@ public class Tokenizer {
                     name = name.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "\'").replaceAll("\\\\\\\\","\\\\");
                     name = name.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\t","\t");
                     char c = name.charAt(0);
-                    result = new Token(TokenType.UINT_LITERAL, (int)(c), this.StartPos);
+                    result = new Token(TokenType.UINT_LITERAL, (long)(c), this.StartPos);
                     break;
                 case DOUBLE_LITERAL:
                     double double_value = Double.parseDouble(this.SavedWord.toString());

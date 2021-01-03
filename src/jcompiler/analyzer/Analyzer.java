@@ -150,9 +150,13 @@ public class Analyzer {
         }
         this.StmtAnalyzer.analyseBlockStmt();
         /*如果函数内部没有返回，看一眼是不是void*/
-        if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0)throw new BranchNoReturnException();
+        if(!Analyzer.ReturnState.peekLast()&&((String)function_type.getValue()).compareTo("void")!=0){
+            throw new BranchNoReturnException();
+        }
+        else if(!Analyzer.ReturnState.peekLast()){//没有完全返回，但是因为是void，所以在最后加一个就行
+            Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("ret"));
+        }
         Analyzer.withdraw();
-        Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("ret"));
         Analyzer.CurrentFunction = StartFunction;
     }
 
