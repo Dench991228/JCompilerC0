@@ -1,5 +1,8 @@
 package jcompiler.action;
 
+import jcompiler.analyzer.Analyzer;
+import jcompiler.analyzer.SymbolEntry;
+import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
 import jcompiler.util.BinaryHelper;
 
@@ -90,5 +93,14 @@ public class Instruction {
         String s = (byte)(this.OpCode)+"("+this.InsName+"):";
         s+=this.Operand.toString();
         return s;
+    }
+    /*调用完一个函数之后，调用者需要弹出其参数*/
+    public static void popAllParameter(Token function_ident){
+        SymbolEntry function_entry = Analyzer.AnalyzerTable.findFunction(function_ident);
+        int function_id = function_entry.getPosition();
+        Function function = Analyzer.ObjFile.getFunctions().get(function_id);
+        int num_pop = function.getParamSlot();
+        Instruction ins = Instruction.getInstruction("popn", num_pop);
+        Analyzer.CurrentFunction.addInstruction(ins);
     }
 }

@@ -225,7 +225,7 @@ public class ExprAnalyzer {
                             if(Analyzer.StandardLibrary.containsKey(t.getValue().toString())){//是一个标准库函数
                                 Analyzer.CurrentFunction.addInstruction(Analyzer.StandardLibrary.get(t.getValue().toString()));
                             }
-                            else{
+                            else{//无参数函数调用
                                 Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("call", function_entry.getPosition()));
                             }
                             nt.ResultType = function_entry.getType();
@@ -256,6 +256,7 @@ public class ExprAnalyzer {
                         else{
                             Analyzer.CurrentFunction.addInstruction(Instruction.getInstruction("call", Analyzer.AnalyzerTable.findFunction(function_ident).getPosition()));
                         }
+                        //Instruction.popAllParameter(function_ident);
                         nt.ResultType = Analyzer.AnalyzerTable.findFunction(function_ident).getType();
                         nt.addTerminal(function_ident);
                     }

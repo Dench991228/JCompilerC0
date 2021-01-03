@@ -26,6 +26,14 @@ public class ObjectFile {
         this.name = s;
     }
 
+    public List<Function> getFunctions() {
+        return Functions;
+    }
+
+    public List<GlobalVariable> getGlobalVariables() {
+        return GlobalVariables;
+    }
+
     /*增加一个全局变量，并且返回其是第几个*/
     public int addGlobalVariable(GlobalVariable gbv){
         this.GlobalVariables.add(gbv);

@@ -151,9 +151,13 @@ public class StmtAnalyzer {
         this.Util.expect(TokenType.RETURN_KW);
         Analyzer.ReturnState.addLast(true);
         if(Analyzer.ExpectedReturnType.getValue().toString().compareTo("void")!=0){//不是void，那就必须有东西
+            Instruction ins = Instruction.getInstruction("arga",0);
+            Analyzer.CurrentFunction.addInstruction(ins);
             if(this.Util.peek().getType()==TokenType.SEMICOLON)throw new ReturnTypeError();
             this.ExprAnalyzer.setExpectedType(Analyzer.ExpectedReturnType);
             this.ExprAnalyzer.analyseExpr(Analyzer.ExpectedReturnType);
+            ins = Instruction.getInstruction("store.64");
+            Analyzer.CurrentFunction.addInstruction(ins);
         }
         this.Util.expect(TokenType.SEMICOLON);
     }

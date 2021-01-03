@@ -54,7 +54,7 @@ public class Function {
     * @return 返回这个参数的偏移量
     * */
     public int registerParam(Token type){
-        int offset = this.ParamSlot;
+        int offset = this.ParamSlot+1;
         this.ParamSlot++;
         return offset;
     }
@@ -84,5 +84,9 @@ public class Function {
             s.append(ins.toString()).append("\n");
         }
         return s.toString();
+    }
+
+    public int getParamSlot() {
+        return ParamSlot;
     }
 }
