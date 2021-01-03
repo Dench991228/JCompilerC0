@@ -106,8 +106,10 @@ public class StmtAnalyzer {
         Instruction former_judge;//用来保存上一个语句的条件跳转
         this.Util.expect(TokenType.IF_KW);//第一个if语句
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
-        //获取这里的语句，保存下来，如果有问题就到下一个字句
-        former_judge = Analyzer.CurrentFunction.getLastInstruction();
+        //获取这里的语句，保存下来，如果有问题就到下一个子句
+        former_judge = Instruction.getInstruction("br.false");
+        Analyzer.CurrentFunction.addInstruction(former_judge);
+
         this.FirstIf=true;
         this.analyseBlockStmt();
         //if块里面的东西没了，记得下来，最后统一跳转到最后的话
@@ -132,7 +134,8 @@ public class StmtAnalyzer {
                 this.Util.expect(TokenType.IF_KW);
                 former_judge.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(former_judge)-1));
                 this.ExprAnalyzer.analyseExpr(Token.INTEGER);
-                former_judge = Analyzer.CurrentFunction.getLastInstruction();//更新former_judge
+                former_judge = Instruction.getInstruction("br.false");//更新条件跳转语句
+                Analyzer.CurrentFunction.addInstruction(former_judge);
                 Analyzer.ReturnState.addLast(false);
                 this.analyseBlockStmt();
                 end_block = Instruction.getInstruction("br");
@@ -141,16 +144,18 @@ public class StmtAnalyzer {
                 last_state = Analyzer.ReturnState.pollLast();
                 if(!last_state)has_branch_no_return = true;
             }
-            Instruction end_if = Instruction.getInstruction("nop");
-            Analyzer.CurrentFunction.addInstruction(end_if);
         }
         //最后的语句，在加入到函数之前，先设置好前面的块结束，无条件跳转
         for(Instruction ins:block_end_instruction){
             ins.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(ins)));
         }
         if(!has_else_clause){//没有else语句，把最后一个子句的跳转拿过来设置一下
-            end_block.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(end_block)));
+            System.out.println("\n\nhahaha\n");
+            former_judge.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(former_judge)));
         }
+        //用来被人跳转
+        Instruction end_if = Instruction.getInstruction("nop");
+        Analyzer.CurrentFunction.addInstruction(end_if);
         if(!has_branch_no_return&&has_else_clause){
             Analyzer.ReturnState.pollLast();
             Analyzer.ReturnState.addLast(true);
@@ -167,7 +172,8 @@ public class StmtAnalyzer {
         /*while的条件解析*/
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
         //之前的算式解析完之后，末尾是一个条件跳转，用来跳到nop_back的，但是没有操作数，先保存一下，后面设置好
-        Instruction conditional_jump = Analyzer.CurrentFunction.getLastInstruction();
+        Instruction conditional_jump = Instruction.getInstruction("br.false");
+        Analyzer.CurrentFunction.addInstruction(conditional_jump);
 
         Analyzer.putLoopState(true);
         Analyzer.putReturnState();
