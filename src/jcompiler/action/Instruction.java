@@ -103,4 +103,8 @@ public class Instruction {
         Instruction ins = Instruction.getInstruction("popn", num_pop);
         Analyzer.CurrentFunction.addInstruction(ins);
     }
+
+    public void setOperand(List<Byte> operand) {
+        Operand = operand;
+    }
 }

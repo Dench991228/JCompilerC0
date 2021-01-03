@@ -1,5 +1,6 @@
 package jcompiler.action;
 
+import jcompiler.action.exceptions.NoSuchInstructionException;
 import jcompiler.tokenizer.Token;
 import jcompiler.util.BinaryHelper;
 
@@ -88,5 +89,17 @@ public class Function {
 
     public int getParamSlot() {
         return ParamSlot;
+    }
+
+    /*计算这条指令跳转到即将加入进来的指令要跳几步：新指令下标-（当前指令下标+1）*/
+    public int getOffset(Instruction ins){
+        int index = this.Instructions.indexOf(ins);//瞅一眼这个在不在里面
+        if(index==-1)throw new NoSuchInstructionException();//如果不包括这条指令，那就GG
+        int cur_position = this.Instructions.size();
+        return cur_position - index;
+    }
+    /*返回一个函数的最后一条指令*/
+    public Instruction getLastInstruction(){
+        return this.Instructions.get(this.Instructions.size()-1);
     }
 }

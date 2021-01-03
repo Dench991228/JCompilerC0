@@ -356,13 +356,51 @@ public class ExprAnalyzer {
                         ins = Instruction.getInstruction(isInteger?"div.i":"div.f");
                         Analyzer.CurrentFunction.addInstruction(ins);
                         break;
-                        // TODO 比较型的先不管
+                        // TODO 比较型一律在最后加上一个条件跳转，表名如果计算结果不是正确的，就跳过下面的块
                     case EQ:
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.true");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
                     case NEQ:
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.false");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
                     case GT:
-                    case GE:
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("set.gt");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.false");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
+                    case GE://不小于就是大于等于
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("set.lt");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.true");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
                     case LT:
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("set.lt");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.false");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
                     case LE:
+                        ins = Instruction.getInstruction(isInteger?"cmp.i":"cmp.f");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("set.gt");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        ins = Instruction.getInstruction("br.true");
+                        Analyzer.CurrentFunction.addInstruction(ins);
+                        break;
                 }
             }
             else{//有问题

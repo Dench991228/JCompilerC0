@@ -7,6 +7,7 @@ import jcompiler.analyzer.exceptions.ReturnTypeError;
 import jcompiler.analyzer.exceptions.StmtSyntaxException;
 import jcompiler.tokenizer.Token;
 import jcompiler.tokenizer.TokenType;
+import jcompiler.util.BinaryHelper;
 
 import java.io.FileNotFoundException;
 
@@ -136,11 +137,30 @@ public class StmtAnalyzer {
     /*解析while语句*/
     private void analyseWhileStmt(){
         this.Util.expect(TokenType.WHILE_KW);
+        /*这里添加一条nop语句，while块结束后，就跳转到这里*/
+        Instruction nop_fore = Instruction.getInstruction("nop");
+        Analyzer.CurrentFunction.addInstruction(nop_fore);
+        /*while的条件解析*/
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
+        //之前的算式解析完之后，末尾是一个条件跳转，用来跳到nop_back的，但是没有操作数，先保存一下，后面设置好
+        Instruction conditional_jump = Analyzer.CurrentFunction.getLastInstruction();
+
         Analyzer.putLoopState(true);
         Analyzer.putReturnState();
-        Analyzer.addSymbolTable();
-        this.analyseBlockStmt();
+        Analyzer.addSymbolTable();//加上一层符号表
+        this.analyseBlockStmt();//解析语句块
+        /*语句块编译完了，这里我得加一个无条件跳转到前面的nop_fore，进行下一轮循环*/
+        Instruction unconditional_jump = Instruction.getInstruction("br", -Analyzer.CurrentFunction.getOffset(nop_fore));
+        Analyzer.CurrentFunction.addInstruction(unconditional_jump);
+
+        //TODO 把前面的conditional_jump的操作数补齐，跳转到下面的语句
+        int offset = Analyzer.CurrentFunction.getOffset(conditional_jump);
+        conditional_jump.setOperand(BinaryHelper.BinaryInteger(offset-1));//正着跳，需要减一
+        //无条件跳转完了，接下来是跳过while的语句，如果前面的条件跳转GG了，就跳转到这里，这里也有一个nop
+        Instruction nop_back = Instruction.getInstruction("nop");
+        Analyzer.CurrentFunction.addInstruction(nop_back);
+
+        //之后的东西
         Analyzer.withdraw();
         Analyzer.ReturnState.pollLast();
         Analyzer.LoopState.pollLast();
