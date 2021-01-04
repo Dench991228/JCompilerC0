@@ -11,6 +11,7 @@ import jcompiler.util.BinaryHelper;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
+import java.util.List;
 
 /*
 * 语法分析器，使用OPG完成expr的分析，先完成expr部分
@@ -169,6 +170,12 @@ public class StmtAnalyzer {
         /*这里添加一条nop语句，while块结束后，就跳转到这里*/
         Instruction nop_fore = Instruction.getInstruction("nop");
         Analyzer.CurrentFunction.addInstruction(nop_fore);
+
+        /*更新Analyzer中相应的while语句开始记录*/
+        Analyzer.StartOfWhile.add(nop_fore);
+        /*更新Analyzer中保存break语句的地方*/
+        Analyzer.BreakStatement.add(new LinkedList<Instruction>());
+
         /*while的条件解析*/
         this.ExprAnalyzer.analyseExpr(Token.INTEGER);
         //之前的算式解析完之后，末尾是一个条件跳转，用来跳到nop_back的，但是没有操作数，先保存一下，后面设置好
@@ -186,13 +193,16 @@ public class StmtAnalyzer {
         int offset = Analyzer.CurrentFunction.getOffset(conditional_jump);
         conditional_jump.setOperand(BinaryHelper.BinaryInteger(offset-1));//正着跳，需要减一
         //无条件跳转完了，接下来是跳过while的语句，如果前面的条件跳转GG了，就跳转到这里，这里也有一个nop
+        //TODO 更新break本层循环的break语句
         Instruction nop_back = Instruction.getInstruction("nop");
         Analyzer.CurrentFunction.addInstruction(nop_back);
-
         //之后的东西
         Analyzer.withdraw();
         Analyzer.ReturnState.pollLast();
         Analyzer.LoopState.pollLast();
+        /*更新Analyzer中保存的东西*/
+        Analyzer.BreakStatement.pollLast();
+        Analyzer.StartOfWhile.pollLast();
     }
 
     /*解析返回语句*/
@@ -222,6 +232,8 @@ public class StmtAnalyzer {
     private void analyseContinueStmt(){
         this.Util.expect(TokenType.CONTINUE_KW);
         this.Util.expect(TokenType.SEMICOLON);
+        Instruction ins = Instruction.getInstruction("br", -Analyzer.CurrentFunction.getOffset(Analyzer.StartOfWhile.peekLast()));
+        Analyzer.CurrentFunction.addInstruction(ins);
     }
 
     /*解析空语句*/

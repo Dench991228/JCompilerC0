@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Analyzer {
 
@@ -43,6 +44,10 @@ public class Analyzer {
     public static final HashMap<String, Instruction> StandardLibrary = new HashMap<>();
     /*函数名称集合*/
     public static final HashSet<String> FunctionNames = new HashSet<>();
+    /*记录正在嵌套的while语句前面的nop*/
+    public static LinkedList<Instruction> StartOfWhile = new LinkedList<>();
+    /*记录所有的break语句对应的br，每一个list代表一层循环嵌套里面的全部break*/
+    public static LinkedList<LinkedList<Instruction>> BreakStatement = new LinkedList<>();
 
     /*初始化标准库*/
     static{
