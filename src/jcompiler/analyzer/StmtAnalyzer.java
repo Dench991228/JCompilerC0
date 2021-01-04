@@ -193,7 +193,10 @@ public class StmtAnalyzer {
         int offset = Analyzer.CurrentFunction.getOffset(conditional_jump);
         conditional_jump.setOperand(BinaryHelper.BinaryInteger(offset-1));//正着跳，需要减一
         //无条件跳转完了，接下来是跳过while的语句，如果前面的条件跳转GG了，就跳转到这里，这里也有一个nop
-        //TODO 更新break本层循环的break语句
+        //更新break本层循环的break语句
+        for(Instruction break_statement:Analyzer.BreakStatement.peekLast()){
+            break_statement.setOperand(BinaryHelper.BinaryInteger(Analyzer.CurrentFunction.getOffset(break_statement)));
+        }
         Instruction nop_back = Instruction.getInstruction("nop");
         Analyzer.CurrentFunction.addInstruction(nop_back);
         //之后的东西
@@ -226,6 +229,9 @@ public class StmtAnalyzer {
     private void analyseBreakStmt(){
         this.Util.expect(TokenType.BREAK_KW);
         this.Util.expect(TokenType.SEMICOLON);
+        Instruction ins = Instruction.getInstruction("br");
+        Analyzer.CurrentFunction.addInstruction(ins);
+        Analyzer.BreakStatement.peekLast().add(ins);
     }
 
     /*解析continue语句*/
