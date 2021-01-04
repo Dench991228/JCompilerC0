@@ -7,8 +7,6 @@ import jcompiler.analyzer.Analyzer;
 import jcompiler.analyzer.AnalyzerUtil;
 import jcompiler.analyzer.ExprAnalyzer;
 import jcompiler.analyzer.StmtAnalyzer;
-import jcompiler.tokenizer.Token;
-import jcompiler.tokenizer.TokenType;
 import jcompiler.tokenizer.Tokenizer;
 import jcompiler.tokenizer.exceptions.UnknownTokenException;
 import jcompiler.util.BinaryHelper;

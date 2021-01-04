@@ -102,4 +102,8 @@ public class Function {
     public Instruction getLastInstruction(){
         return this.Instructions.get(this.Instructions.size()-1);
     }
+
+    public int getReturnSlot(){
+        return this.ReturnSlot;
+    }
 }

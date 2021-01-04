@@ -93,7 +93,7 @@ public class SymbolTable {
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
             case 1://参数
-                ins = Instruction.getInstruction("arga", entry.getPosition());
+                ins = Instruction.getInstruction("arga", entry.getPosition()-(Analyzer.CurrentFunction.getReturnSlot()==0?1:0));
                 Analyzer.CurrentFunction.addInstruction(ins);
                 ins = Instruction.getInstruction("load.64");
                 Analyzer.CurrentFunction.addInstruction(ins);
@@ -116,7 +116,7 @@ public class SymbolTable {
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
             case 1://参数
-                ins = Instruction.getInstruction("arga", entry.getPosition());
+                ins = Instruction.getInstruction("arga", entry.getPosition()-(Analyzer.CurrentFunction.getReturnSlot()==0?1:0));
                 System.out.println("visited argument");
                 Analyzer.CurrentFunction.addInstruction(ins);
                 break;
